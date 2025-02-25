@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "850118060878",
+    "project_id": "pharmacysupplymanagement",
+    "storage_bucket": "pharmacysupplymanagement.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:850118060878:android:065c67a2c03c910003cc1f",
+        "android_client_info": {
+          "package_name": "com.example.pharamacy_supply_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH3jxa9nUJ7uExJvJ6dfkzRsFMVYvC5qI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
