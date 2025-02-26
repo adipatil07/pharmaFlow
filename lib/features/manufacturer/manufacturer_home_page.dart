@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/manufacturer/add_product_page.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
+import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
+import 'package:provider/provider.dart';
 
 class ManufacturerHomePage extends StatefulWidget {
   const ManufacturerHomePage({super.key});
@@ -13,21 +14,22 @@ class ManufacturerHomePage extends StatefulWidget {
 }
 
 class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
-  int _selectedIndex = 0; // 0: Medicines, 1: View Orders
+  int _selectedIndex = 0; 
 
-  Stream<List<Map<String, dynamic>>> fetchMedicines() {
-    String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-
-    return FirebaseFirestore.instance
-        .collection('Products')
-        .where('manufacturerId',
-            isEqualTo: currentUserId) // Filter by manufacturerId
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<ManufacturerNotifier>(context, listen: false)
+          .fetchMedicines();
+      Provider.of<ManufacturerNotifier>(context, listen: false).fetchOrders();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final manufacturerNotifier = Provider.of<ManufacturerNotifier>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -39,15 +41,14 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
         backgroundColor: AppTheme.primaryColor,
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => LoginPage(),
-                ),
+                MaterialPageRoute(builder: (context) => LoginPage()),
               );
             },
-            icon: Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: Colors.white),
           )
         ],
       ),
@@ -84,8 +85,8 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
           ),
           Expanded(
             child: _selectedIndex == 0
-                ? _buildMedicinesList()
-                : _buildViewOrders(),
+                ? _buildMedicinesList(manufacturerNotifier)
+                : _buildOrdersList(manufacturerNotifier),
           ),
         ],
       ),
@@ -94,62 +95,83 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => AddProductForm(),
-            ),
+            MaterialPageRoute(builder: (context) => AddProductForm()),
           );
         },
-        child: Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildMedicinesList() {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: fetchMedicines(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-              child: Text("No medicines found.",
-                  style: TextStyle(color: Colors.black54)));
-        }
-        var medicines = snapshot.data!;
-        return ListView.builder(
-          itemCount: medicines.length,
-          itemBuilder: (context, index) {
-            var medicine = medicines[index];
-            return Card(
-              color: Colors.white,
-              margin: const EdgeInsets.all(8.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                title: Text(
-                  medicine['productName'] ?? 'No Name',
-                  style: AppTheme.subtitleTextStyle
-                      .copyWith(fontSize: 16, color: AppTheme.primaryColor),
-                ),
-                subtitle: Text(
-                  "Batch: ${medicine['batchNumber'] ?? 'N/A'}",
-                  style: AppTheme.chipTextStyle
-                      .copyWith(color: AppTheme.headlineColor),
-                ),
-              ),
-            );
-          },
+  Widget _buildMedicinesList(ManufacturerNotifier notifier) {
+    if (notifier.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (notifier.medicines.isEmpty) {
+      return const Center(
+          child: Text("No medicines found.",
+              style: TextStyle(color: Colors.black54)));
+    }
+    return ListView.builder(
+      itemCount: notifier.medicines.length,
+      itemBuilder: (context, index) {
+        var medicine = notifier.medicines[index];
+        return Card(
+          color: Colors.white,
+          margin: const EdgeInsets.all(8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            title: Text(
+              medicine['productName'] ?? 'No Name',
+              style: AppTheme.subtitleTextStyle
+                  .copyWith(fontSize: 16, color: AppTheme.primaryColor),
+            ),
+            subtitle: Text(
+              "Batch: ${medicine['batchNumber'] ?? 'N/A'}",
+              style: AppTheme.chipTextStyle
+                  .copyWith(color: AppTheme.headlineColor),
+            ),
+          ),
         );
       },
     );
   }
 
-  Widget _buildViewOrders() {
-    return const Center(
-      child: Text("View Orders (Coming Soon)",
-          style: TextStyle(color: Colors.black54)),
+  Widget _buildOrdersList(ManufacturerNotifier notifier) {
+    if (notifier.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (notifier.orders.isEmpty) {
+      return const Center(
+          child: Text("No orders found.",
+              style: TextStyle(color: Colors.black54)));
+    }
+    return ListView.builder(
+      itemCount: notifier.orders.length,
+      itemBuilder: (context, index) {
+        var order = notifier.orders[index];
+        return Card(
+          color: Colors.white,
+          margin: const EdgeInsets.all(8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            title: Text(
+              "Order ID: ${order['orderId']}",
+              style: AppTheme.subtitleTextStyle
+                  .copyWith(fontSize: 16, color: AppTheme.primaryColor),
+            ),
+            subtitle: Text(
+              "Medicine: ${order['medicine']}",
+              style: AppTheme.chipTextStyle
+                  .copyWith(color: AppTheme.headlineColor),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -2,6 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/auth/splash_screen.dart';
+import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
+import 'package:pharma_supply/features/patient/add_order_notifier.dart';
+import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +16,16 @@ void main() async {
     messagingSenderId: "1:850118060878:android:065c67a2c03c910003cc1f",
     projectId: "pharmacysupplymanagement",
   ));
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ManufacturerNotifier()),
+        ChangeNotifierProvider(create: (_) => AddOrderNotifier()),
+        ChangeNotifierProvider(create: (_) => PatientHomeNotifier()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
