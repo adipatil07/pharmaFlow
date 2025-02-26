@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
-import 'package:pharma_supply/features/manufacturer/block.dart';
+import 'package:pharma_supply/constants/block.dart';
 import 'package:pharma_supply/features/manufacturer/manufacturer_home_page.dart';
 import 'package:pharma_supply/features/manufacturer/models/medical_product_model.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
@@ -146,6 +146,7 @@ class _AddProductFormState extends State<AddProductForm> {
       );
     }
   }
+
   String generateUniqueSerialNumber() {
     Random random = Random();
     int timestampPart = DateTime.now().millisecondsSinceEpoch % 1000000000;

@@ -41,15 +41,16 @@ class Block {
     );
   }
 
-
   // Calculate hash using SHA-256
-  static String calculateHash(int index, String previousHash, int nonce, String data) {
+  static String calculateHash(
+      int index, String previousHash, int nonce, String data) {
     final String input = '$index$previousHash$nonce$data';
     return sha256.convert(utf8.encode(input)).toString();
   }
 
   // Mine a block (find a nonce that satisfies difficulty)
-  static Block mineBlock(int index, String previousHash, String product, int difficulty) {
+  static Block mineBlock(
+      int index, String previousHash, String product, int difficulty) {
     int nonce = 0;
     String hash;
     final String data = product;
