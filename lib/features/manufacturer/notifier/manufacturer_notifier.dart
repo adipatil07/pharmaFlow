@@ -36,11 +36,11 @@ class ManufacturerNotifier extends ChangeNotifier {
   Future<void> fetchOrders() async {
     _isLoading = true;
     notifyListeners();
-    String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    // String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
     try {
       var snapshot = await FirebaseFirestore.instance
           .collection('Orders')
-          .where('manufacturerId', isEqualTo: manufacturerId)
+          // .where('manufacturerId', isEqualTo: manufacturerId)
           .get();
       _orders = snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {

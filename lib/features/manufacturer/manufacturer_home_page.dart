@@ -4,6 +4,8 @@ import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/manufacturer/add_product_page.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
+import 'package:pharma_supply/features/patient/add_order_notifier.dart';
+import 'package:pharma_supply/widgets/transporter_selection_widget.dart';
 import 'package:provider/provider.dart';
 
 class ManufacturerHomePage extends StatefulWidget {
@@ -14,7 +16,7 @@ class ManufacturerHomePage extends StatefulWidget {
 }
 
 class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
-  int _selectedIndex = 0; 
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -70,6 +72,8 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                 setState(() {
                   _selectedIndex = index;
                 });
+                manufacturerNotifier.fetchOrders();
+                manufacturerNotifier.fetchMedicines();
               },
               children: const [
                 Padding(
@@ -145,8 +149,11 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
     }
     if (notifier.orders.isEmpty) {
       return const Center(
-          child: Text("No orders found.",
-              style: TextStyle(color: Colors.black54)));
+        child: Text(
+          "No orders found.",
+          style: TextStyle(color: Colors.black54),
+        ),
+      );
     }
     return ListView.builder(
       itemCount: notifier.orders.length,
@@ -154,20 +161,82 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
         var order = notifier.orders[index];
         return Card(
           color: Colors.white,
-          margin: const EdgeInsets.all(8.0),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          child: ListTile(
-            title: Text(
-              "Order ID: ${order['orderId']}",
-              style: AppTheme.subtitleTextStyle
-                  .copyWith(fontSize: 16, color: AppTheme.primaryColor),
-            ),
-            subtitle: Text(
-              "Medicine: ${order['medicine']}",
-              style: AppTheme.chipTextStyle
-                  .copyWith(color: AppTheme.headlineColor),
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Order ID: ${order['id']}",
+                      style: AppTheme.subtitleTextStyle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primaryColor),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Medicine: ${order['medicine']}",
+                      style: AppTheme.chipTextStyle.copyWith(
+                          fontSize: 14, color: AppTheme.headlineColor),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        Map<String, dynamic> orderData = {
+                          'id': order['id'],
+                          'label': "Manufacturer to Transporter",
+                          "by": "Manufacturer",
+                          "to": "Transporter",
+                        };
+                        if (order['id'] != null) {
+                          await Provider.of<AddOrderNotifier>(context,
+                                  listen: false)
+                              .addBlockToOrderChain(orderData);
+                        } else {
+                          print("Error: Order ID is null");
+                        }
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: AppTheme.backgroundColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (context) {
+                            return TransporterSelectionWidget(
+                                orderId: order['id'], notifier: notifier);
+                          },
+                        );
+                      },
+                      icon: Icon(
+                        Icons.done,
+                        color: Colors.green,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );

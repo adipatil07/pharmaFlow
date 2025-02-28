@@ -41,26 +41,27 @@ class FirebaseService {
     }
   }
 
-  static Future<Map<String, dynamic>> getLastOrdersChainBlock(String orderId) async {
-  try {
-    final orderChainSnapshot = await _firestore
-        .collection('Orders')
-        .doc(orderId)
-        .collection('orderChain') // Access order's orderChain
-        .orderBy('latestModifiedTimestamp', descending: true) // Get latest block
-        .limit(1)
-        .get();
-
-    if (orderChainSnapshot.docs.isNotEmpty) {
-      return orderChainSnapshot.docs.first.data(); // Return latest orderChain block
+  static Future<Map<String, dynamic>> getLastOrdersChainBlock(
+      String orderId) async {
+    try {
+      final orderChainSnapshot = await _firestore
+          .collection('Orders')
+          .doc(orderId)
+          .collection('orderChain') // Access order's orderChain
+          .get();
+      print(orderId);
+      if (orderChainSnapshot.docs.isNotEmpty) {
+        return orderChainSnapshot.docs.last
+            .data(); // Return latest orderChain block
+      } else {
+        return {};
+      }
+    } catch (e) {
+      print("Error fetching latest orderChain block: $e");
     }
-  } catch (e) {
-    print("Error fetching latest orderChain block: $e");
+
+    return {}; // Return empty if no data found
   }
-
-  return {}; // Return empty if no data found
-}
-
 
   static Future<UserModel?> registerUser({
     required String name,

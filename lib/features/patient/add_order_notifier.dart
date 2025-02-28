@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pharma_supply/constants/block.dart';
 import 'package:pharma_supply/constants/order_block.dart';
 import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
@@ -114,26 +113,31 @@ class AddOrderNotifier extends ChangeNotifier {
   }
 
   Future<void> addBlockToOrderChain(Map<String, dynamic> orderData) async {
+    print("Calling from addBlockTOORderChain");
     try {
       Map<String, dynamic>? lastBlockData =
           await FirebaseService.getLastOrdersChainBlock(orderData['id']);
-
+      print("${orderData['id']}");
+      print("$lastBlockData");
       if (lastBlockData.isEmpty) {
-        // print("No existing blocks found. Please create the Genesis block first.");
+        print(
+            "No existing blocks found. Please create the Genesis block first.");
         return;
       }
 
       OrderBlock lastBlock = OrderBlock.fromJson(lastBlockData);
-
+      print("COntinue 2");
       int newIndex = lastBlock.index + 1;
       OrderBlock newBlock = OrderBlock.mineBlock(
-          newIndex,
-          lastBlock.hash,
-          orderData['id'],
-          orderData['nonce'] ?? 2,
-          orderData['order'],
-          orderData['by'],
-          orderData['to']);
+        newIndex,
+        lastBlock.hash,
+        orderData['id'],
+        2,
+        orderData['label'],
+        orderData['by'],
+        orderData['to'],
+      );
+      print("COntinue 3");
 
       // Add the new block to Firestore in the same orderChain subcollection
       await FirebaseFirestore.instance
@@ -143,6 +147,7 @@ class AddOrderNotifier extends ChangeNotifier {
           .doc(newIndex.toString())
           .set(newBlock.toJson());
 
+      print("COntinue 4");
       // print("New block added to orderChain successfully!");
     } catch (e) {
       // print("Error adding block to orderChain: $e");
