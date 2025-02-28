@@ -24,8 +24,8 @@ class PatientHomeNotifier extends ChangeNotifier {
       if (userId.isEmpty) return;
 
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('PatientOrders')
-          .where('patientId', isEqualTo: userId)
+          .collection('Orders')
+          .where('orderedById', isEqualTo: userId)
           .get();
 
       _orders = querySnapshot.docs

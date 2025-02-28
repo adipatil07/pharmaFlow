@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
+import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/features/patient/add_order_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -45,7 +48,39 @@ class AddOrderPage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: notifier.isLoading
                         ? null
-                        : () => notifier.placeOrder(context),
+                        : () async {
+                            String? patientId =
+                                FirebaseAuth.instance.currentUser?.uid;
+                            DocumentSnapshot userDoc = await FirebaseFirestore
+                                .instance
+                                .collection('users')
+                                .doc(patientId)
+                                .get();
+                            UserModel loggedInUser = UserModel.fromMap(
+                                userDoc.data() as Map<String, dynamic>);
+                            String orderId = DateTime.now()
+                                .millisecondsSinceEpoch
+                                .toString();
+
+                            Map<String, dynamic> orderData = {
+                              'id': orderId,
+                              'orderedBy': '${loggedInUser.name}_$patientId',
+                              'orderedById': '$patientId',
+                              'medicine': notifier.selectedMedicine,
+                              'current_handler': "Patient",
+                              'currentTransistStatement':
+                                  "Order is Placed By Patient",
+                              'delivered': false,
+                              'hospital_id': "NA",
+                              'latestModifiedBy':
+                                  '${loggedInUser.name}_$patientId',
+                              'latestModifiedTimestamp':
+                                  DateTime.now().toIso8601String(),
+                              'orderTimestamp':
+                                  DateTime.now().toIso8601String(),
+                            };
+                            notifier.placeOrder(context, orderData);
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       padding: const EdgeInsets.symmetric(

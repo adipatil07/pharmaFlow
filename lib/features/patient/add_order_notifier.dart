@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pharma_supply/constants/block.dart';
+import 'package:pharma_supply/constants/order_block.dart';
 import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +38,8 @@ class AddOrderNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> placeOrder(BuildContext context) async {
+  Future<void> placeOrder(
+      BuildContext context, Map<String, dynamic> orderData) async {
     if (_selectedMedicine == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -49,21 +51,15 @@ class AddOrderNotifier extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    String? patientId = FirebaseAuth.instance.currentUser?.uid;
-    String orderId = DateTime.now().millisecondsSinceEpoch.toString();
-
-    Map<String, dynamic> orderData = {
-      'orderId': orderId,
-      'patientId': patientId,
-      'medicine': _selectedMedicine,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
+    // String? patientId = FirebaseAuth.instance.currentUser?.uid;
+    // String? patientName = FirebaseAuth.instance.currentUser?.displayName;
+    // String orderId = DateTime.now().millisecondsSinceEpoch.toString();
 
     await FirebaseFirestore.instance
-        .collection('PatientOrders')
-        .doc(orderId)
+        .collection('Orders')
+        .doc(orderData['id'])
         .set(orderData);
-    await updateOrderBlockchain(orderId);
+    await createOrderBlockchain(orderData);
 
     _isLoading = false;
     notifyListeners();
@@ -78,37 +74,78 @@ class AddOrderNotifier extends ChangeNotifier {
     );
   }
 
-  Future<void> updateOrderBlockchain(String orderId) async {
+  Future<void> createOrderBlockchain(Map<String, dynamic> orderData) async {
     Map<String, dynamic>? lastBlockData =
-        await FirebaseService.getLastOrdersChainBlock();
+        await FirebaseService.getLastOrdersChainBlock(orderData['id']);
 
-    Block lastBlock;
+    OrderBlock lastBlock;
     if (lastBlockData.isEmpty) {
-      lastBlock = Block(
+      lastBlock = OrderBlock(
           index: 0,
           previousHash: "0",
           nonce: 1,
           hash:
               'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-          product: 'Genesis Block',
+          order: 'Genesis Block',
           timeStamp: '',
-          label: "");
+          label: "0th Block",
+          by: '',
+          to: '');
     } else {
-      lastBlock = Block.fromJson(lastBlockData);
+      lastBlock = OrderBlock.fromJson(lastBlockData);
     }
 
     int newIndex = lastBlock.index + 1;
-    Block newBlock = Block.mineBlock(
-      newIndex,
-      lastBlock.hash,
-      orderId,
-      2,
-      'Order Created By ${FirebaseAuth.instance.currentUser!.uid}',
-    );
+    OrderBlock newBlock = OrderBlock.mineBlock(
+        newIndex,
+        lastBlock.hash,
+        orderData['id'],
+        2,
+        'Order Created By ${FirebaseAuth.instance.currentUser!.uid}',
+        orderData['orderedBy'],
+        'Manufacturer');
 
     await FirebaseFirestore.instance
-        .collection('PatientOrderChain')
+        .collection('Orders')
+        .doc(orderData['id'])
+        .collection('orderChain')
         .doc(newIndex.toString())
         .set(newBlock.toJson());
+  }
+
+  Future<void> addBlockToOrderChain(Map<String, dynamic> orderData) async {
+    try {
+      Map<String, dynamic>? lastBlockData =
+          await FirebaseService.getLastOrdersChainBlock(orderData['id']);
+
+      if (lastBlockData.isEmpty) {
+        // print("No existing blocks found. Please create the Genesis block first.");
+        return;
+      }
+
+      OrderBlock lastBlock = OrderBlock.fromJson(lastBlockData);
+
+      int newIndex = lastBlock.index + 1;
+      OrderBlock newBlock = OrderBlock.mineBlock(
+          newIndex,
+          lastBlock.hash,
+          orderData['id'],
+          orderData['nonce'] ?? 2,
+          orderData['order'],
+          orderData['by'],
+          orderData['to']);
+
+      // Add the new block to Firestore in the same orderChain subcollection
+      await FirebaseFirestore.instance
+          .collection('Orders')
+          .doc(orderData['id'])
+          .collection('orderChain')
+          .doc(newIndex.toString())
+          .set(newBlock.toJson());
+
+      // print("New block added to orderChain successfully!");
+    } catch (e) {
+      // print("Error adding block to orderChain: $e");
+    }
   }
 }

@@ -41,15 +41,26 @@ class FirebaseService {
     }
   }
 
-  static Future<Map<String, dynamic>> getLastOrdersChainBlock() async {
-    final snapshot = await _firestore.collection('PatientOrderChain').get();
-    if (snapshot.docs.isNotEmpty) {
-      Map<String, dynamic> lastBlockData = snapshot.docs.last.data();
-      return lastBlockData;
-    } else {
-      return {};
+  static Future<Map<String, dynamic>> getLastOrdersChainBlock(String orderId) async {
+  try {
+    final orderChainSnapshot = await _firestore
+        .collection('Orders')
+        .doc(orderId)
+        .collection('orderChain') // Access order's orderChain
+        .orderBy('latestModifiedTimestamp', descending: true) // Get latest block
+        .limit(1)
+        .get();
+
+    if (orderChainSnapshot.docs.isNotEmpty) {
+      return orderChainSnapshot.docs.first.data(); // Return latest orderChain block
     }
+  } catch (e) {
+    print("Error fetching latest orderChain block: $e");
   }
+
+  return {}; // Return empty if no data found
+}
+
 
   static Future<UserModel?> registerUser({
     required String name,
@@ -121,29 +132,4 @@ class FirebaseService {
       return null;
     }
   }
-
-  static Future<bool> updatePatientOrdersChainLabel({required String productId,required String label}) async {
-  try {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('PatientOrderChain')
-        .where('product', isEqualTo: productId)
-        .get();
-
-    if (querySnapshot.docs.isEmpty) {
-      print("No block found for the given productId: $productId");
-      return false; // Product block not found
-    }
-
-    DocumentReference docRef = querySnapshot.docs.first.reference;
-
-    await docRef.update({"label": label});
-
-    print("Updated PatientOrdersChain block successfully for productId: $productId");
-    return true;
-  } catch (e) {
-    print("Error updating PatientOrdersChain block: $e");
-    return false; // Update failed
-  }
-}
-
 }

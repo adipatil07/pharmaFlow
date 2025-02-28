@@ -115,10 +115,10 @@ Widget _buildTrackOrders(PatientHomeNotifier notifier) {
                         fontSize: 16,
                       ),
                     ),
-                    subtitle: Text("Order Id: ${order['orderId']}"),
+                    subtitle: Text("Order Id: ${order['id']}"),
                     children: [
                       TrackingCard(
-                        trackingId: order['orderId'],
+                        trackingId: order['id'],
                         status: 'Status',
                         currentStep: 1,
                         hasHospitalStep: true,

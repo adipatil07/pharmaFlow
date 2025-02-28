@@ -39,7 +39,7 @@ class ManufacturerNotifier extends ChangeNotifier {
     String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
     try {
       var snapshot = await FirebaseFirestore.instance
-          .collection('PatientOrders')
+          .collection('Orders')
           .where('manufacturerId', isEqualTo: manufacturerId)
           .get();
       _orders = snapshot.docs.map((doc) => doc.data()).toList();
