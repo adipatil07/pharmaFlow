@@ -351,7 +351,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                   CircleAvatar(
                     backgroundColor: Colors.blue,
                     child: Text(
-                      "${dummyOrder.clientName.substring(0, 1)}",
+                      dummyOrder.clientName.substring(0, 1),
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
@@ -366,7 +366,7 @@ class _TransporterHomePageState extends State<TransporterHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${dummyOrder.clientName}",
+                        dummyOrder.clientName,
                         style: TextStyle(
                             color: Colors.black,
                             fontSize: 25,

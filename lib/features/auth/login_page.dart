@@ -9,9 +9,11 @@ import 'package:pharma_supply/features/patient/patient_home_page.dart';
 import 'package:pharma_supply/features/pharma_store/pharma_store_home_page.dart';
 import 'package:pharma_supply/features/transporter/transporter_home_page.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
-import 'package:pharma_supply/widgets/SnackBarHelper.dart';
+import 'package:pharma_supply/widgets/snackbar_helper.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }

@@ -17,7 +17,7 @@ class FirebaseService {
         return null; // Product not found
       }
     } catch (e) {
-      print("Error fetching product details: $e");
+      // print("Error fetching product details: $e");
       return null;
     }
   }
@@ -83,7 +83,7 @@ class FirebaseService {
 
       return newUser;
     } catch (e) {
-      print("Error registering user: $e");
+      // print("Error registering user: $e");
       return null;
     }
   }
@@ -113,14 +113,37 @@ class FirebaseService {
 
         return loggedInUser;
       } else {
-        print("User not found in Firestore.");
+        // print("User not found in Firestore.");
         return null;
       }
     } catch (e) {
-      print("Error logging in user: $e");
+      // print("Error logging in user: $e");
       return null;
     }
   }
 
-  
+  static Future<bool> updatePatientOrdersChainLabel({required String productId,required String label}) async {
+  try {
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('PatientOrderChain')
+        .where('product', isEqualTo: productId)
+        .get();
+
+    if (querySnapshot.docs.isEmpty) {
+      print("No block found for the given productId: $productId");
+      return false; // Product block not found
+    }
+
+    DocumentReference docRef = querySnapshot.docs.first.reference;
+
+    await docRef.update({"label": label});
+
+    print("Updated PatientOrdersChain block successfully for productId: $productId");
+    return true;
+  } catch (e) {
+    print("Error updating PatientOrdersChain block: $e");
+    return false; // Update failed
+  }
+}
+
 }

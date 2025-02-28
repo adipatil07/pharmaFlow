@@ -9,6 +9,7 @@ class Block {
   final String hash;
   final String timeStamp;
   final String product;
+  final String label;
 
   Block({
     required this.index,
@@ -17,6 +18,7 @@ class Block {
     required this.hash,
     required this.timeStamp,
     required this.product,
+    required this.label
   });
 
   Map<String, dynamic> toJson() {
@@ -27,6 +29,7 @@ class Block {
       'hash': hash,
       'timeStamp': timeStamp,
       'product': product,
+      'label':label,
     };
   }
 
@@ -38,6 +41,7 @@ class Block {
       hash: json['hash'],
       timeStamp: json['timeStamp'],
       product: json['product'],
+      label:json['label'],
     );
   }
 
@@ -50,7 +54,7 @@ class Block {
 
   // Mine a block (find a nonce that satisfies difficulty)
   static Block mineBlock(
-      int index, String previousHash, String product, int difficulty) {
+      int index, String previousHash, String product, int difficulty,String label) {
     int nonce = 0;
     String hash;
     final String data = product;
@@ -67,7 +71,7 @@ class Block {
       nonce: nonce,
       hash: hash,
       timeStamp: timeStamp,
-      product: product,
+      product: product, label: label,
     );
   }
 }

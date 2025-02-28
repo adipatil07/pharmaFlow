@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
       title: 'PharmaFlow',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: SplashScreen()
     );
   }
 }

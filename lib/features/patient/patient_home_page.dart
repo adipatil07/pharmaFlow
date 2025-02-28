@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/patient/add_order_page.dart';
 import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
+import 'package:pharma_supply/widgets/tracking_card.dart';
 import 'package:provider/provider.dart';
 
 class PatientHomePage extends StatelessWidget {
@@ -10,7 +11,7 @@ class PatientHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => PatientHomeNotifier(),
+      create: (_) => PatientHomeNotifier()..fetchOrders(),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Patient Home',
@@ -37,7 +38,10 @@ class PatientHomePage extends StatelessWidget {
                       notifier.selectedIndex == 0,
                       notifier.selectedIndex == 1
                     ],
-                    onPressed: (index) => notifier.updateIndex(index),
+                    onPressed: (index) {
+                      notifier.updateIndex(index);
+                      notifier.fetchOrders();
+                    },
                     children: const [
                       Padding(
                         padding:
@@ -59,7 +63,7 @@ class PatientHomePage extends StatelessWidget {
                 builder: (context, notifier, child) {
                   return notifier.selectedIndex == 0
                       ? _buildPastOrders()
-                      : _buildTrackOrders();
+                      : _buildTrackOrders(notifier);
                 },
               ),
             ),
@@ -80,11 +84,50 @@ class PatientHomePage extends StatelessWidget {
   }
 }
 
-Widget _buildTrackOrders() {
-  return const Center(
-    child: Text("Track Orders (Coming Soon)",
-        style: TextStyle(color: Colors.black54)),
-  );
+Widget _buildTrackOrders(PatientHomeNotifier notifier) {
+  return notifier.isLoading
+      ? const Center(child: CircularProgressIndicator())
+      : notifier.orders.isEmpty
+          ? const Center(
+              child: Text("No active orders.",
+                  style: TextStyle(color: Colors.black54)),
+            )
+          : ListView.builder(
+              itemCount: notifier.orders.length,
+              itemBuilder: (context, index) {
+                final order = notifier.orders[index];
+                return Card(
+                  color: AppTheme.cardColor,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ExpansionTile(
+                    childrenPadding: EdgeInsets.symmetric(vertical: 15),
+                    tilePadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    title: Text(
+                      order['medicine'],
+                      style: AppTheme.bodyTextStyle.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text("Order Id: ${order['orderId']}"),
+                    children: [
+                      TrackingCard(
+                        trackingId: order['orderId'],
+                        status: 'Status',
+                        currentStep: 1,
+                        hasHospitalStep: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
 }
 
 Widget _buildPastOrders() {

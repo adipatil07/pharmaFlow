@@ -4,6 +4,8 @@ import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }

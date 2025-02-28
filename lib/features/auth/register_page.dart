@@ -3,7 +3,7 @@ import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/constants/constants.dart';
 import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
-import 'package:pharma_supply/widgets/SnackBarHelper.dart';
+import 'package:pharma_supply/widgets/snackbar_helper.dart';
 
 class RegisterPage extends StatefulWidget {
   @override

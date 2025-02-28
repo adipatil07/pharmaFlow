@@ -4,12 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:pharma_supply/constants/block.dart';
-import 'package:pharma_supply/features/manufacturer/add_product_page.dart';
-import 'package:pharma_supply/features/manufacturer/manufacturer_home_page.dart';
 import 'package:pharma_supply/features/manufacturer/models/medical_product_model.dart';
 import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
-import 'package:pharma_supply/widgets/SnackBarHelper.dart';
+import 'package:pharma_supply/widgets/snackbar_helper.dart';
 import 'package:provider/provider.dart';
 
 class AddProductProvider extends ChangeNotifier {
@@ -106,7 +104,7 @@ class AddProductProvider extends ChangeNotifier {
           await FirebaseService.getLastProductsChainBlock();
       Block lastBlock = Block.fromJson(lastProductBlock);
       Block newBlock = Block.mineBlock(
-          lastBlock.index + 1, lastBlock.hash, medicalTablet.serialNumber, 2);
+          lastBlock.index + 1, lastBlock.hash, medicalTablet.serialNumber, 2,'');
       await addBlock(newBlock.toJson(), lastBlock.index + 1);
     });
     Provider.of<ManufacturerNotifier>(context, listen: false).fetchMedicines();
