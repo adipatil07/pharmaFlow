@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
+import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/features/manufacturer/add_product_page.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
 import 'package:pharma_supply/features/patient/add_order_notifier.dart';
+import 'package:pharma_supply/services/firebase_service.dart';
 import 'package:pharma_supply/widgets/transporter_selection_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -201,6 +204,22 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                           "by": "Manufacturer",
                           "to": "Transporter",
                         };
+                        try {
+                          UserModel loggedInUser =
+                              await FirebaseService.loggedInUser();
+                          await FirebaseService.updateOrderDetails(
+                              orderData['id'], {
+                            "latestModifiedBy":
+                                '${loggedInUser.name}_${loggedInUser.id}',
+                            "latestModifiedTimestamp":
+                                DateTime.now().toIso8601String(),
+                            "current_handler": "Manufacturer",
+                            "currentTransistStatement":
+                                "Manufacturing to Transporter"
+                          });
+                        } catch (e) {
+                          print("error");
+                        }
                         if (order['id'] != null) {
                           await Provider.of<AddOrderNotifier>(context,
                                   listen: false)
@@ -208,6 +227,7 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                         } else {
                           print("Error: Order ID is null");
                         }
+
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,

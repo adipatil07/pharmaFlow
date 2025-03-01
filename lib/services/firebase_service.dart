@@ -133,4 +133,22 @@ class FirebaseService {
       return null;
     }
   }
+
+  static Future<UserModel> loggedInUser() async {
+    String? patientId = FirebaseAuth.instance.currentUser?.uid;
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(patientId)
+        .get();
+    UserModel loggedInUser =
+        UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+    return loggedInUser;
+  }
+
+  static Future<void> updateOrderDetails(
+      String id, Map<String, dynamic> data) async {
+    DocumentReference orderRef =
+        FirebaseFirestore.instance.collection('Orders').doc(id);
+    await orderRef.update(data);
+  }
 }

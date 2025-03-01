@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
+import 'package:pharma_supply/services/firebase_service.dart';
 
 class TransporterSelectionWidget extends StatefulWidget {
   final String orderId;
@@ -86,8 +87,18 @@ class _TransporterSelectionWidgetState
           ElevatedButton(
             onPressed: selectedTransporter == null
                 ? null
-                : () {
-                    _assignTransporter();
+                : () async {
+                    var selectedTransporterDetails = transporters.firstWhere(
+                        (t) => t['id'] == selectedTransporter,
+                        orElse: () => {});
+
+                    if (selectedTransporterDetails.isNotEmpty) {
+                      await FirebaseService.updateOrderDetails(widget.orderId, {
+                        "assigned_transporter":
+                            '${selectedTransporterDetails['name']}_${selectedTransporterDetails['id']}'
+                      });
+                      Navigator.pop(context);
+                    }
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
@@ -103,12 +114,5 @@ class _TransporterSelectionWidgetState
         ],
       ),
     );
-  }
-
-  void _assignTransporter() async {
-    if (selectedTransporter == null) return;
-
-    // await widget.notifier.assignTransporter(widget.orderId, selectedTransporter!);
-    Navigator.pop(context);
   }
 }
