@@ -6,7 +6,6 @@ import 'package:pharma_supply/features/auth/register_page.dart';
 import 'package:pharma_supply/features/hospital/hospital_home_page.dart';
 import 'package:pharma_supply/features/manufacturer/manufacturer_home_page.dart';
 import 'package:pharma_supply/features/patient/patient_home_page.dart';
-import 'package:pharma_supply/features/pharma_store/pharma_store_home_page.dart';
 import 'package:pharma_supply/features/transporter/transporter_home_page.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 import 'package:pharma_supply/widgets/snackbar_helper.dart';
@@ -39,6 +38,7 @@ class _LoginPageState extends State<LoginPage> {
             physics: const BouncingScrollPhysics(),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 60),
                 _buildLogo(),
@@ -248,11 +248,6 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => PatientHomePage()),
-        );
-      } else if (user.type == "MedicineStore") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Pharmastorehomepage()),
         );
       } else if (user.type == "Hospital") {
         Navigator.pushReplacement(

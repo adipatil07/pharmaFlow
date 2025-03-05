@@ -40,7 +40,7 @@ class ManufacturerNotifier extends ChangeNotifier {
     try {
       var snapshot = await FirebaseFirestore.instance
           .collection('Orders')
-          // .where('manufacturerId', isEqualTo: manufacturerId)
+          .where('current_handler', isEqualTo: "Manufacturer")
           .get();
       _orders = snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {

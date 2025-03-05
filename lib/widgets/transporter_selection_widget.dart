@@ -95,7 +95,8 @@ class _TransporterSelectionWidgetState
                     if (selectedTransporterDetails.isNotEmpty) {
                       await FirebaseService.updateOrderDetails(widget.orderId, {
                         "assigned_transporter":
-                            '${selectedTransporterDetails['name']}_${selectedTransporterDetails['id']}'
+                            '${selectedTransporterDetails['name']}_${selectedTransporterDetails['id']}',
+                        "current_handler": "Transporter"
                       });
                       Navigator.pop(context);
                     }

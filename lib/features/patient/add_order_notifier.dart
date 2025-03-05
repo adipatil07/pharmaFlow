@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pharma_supply/constants/order_block.dart';
-import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
-import 'package:provider/provider.dart';
 
 class AddOrderNotifier extends ChangeNotifier {
   String? _selectedMedicine;
@@ -64,10 +62,9 @@ class AddOrderNotifier extends ChangeNotifier {
     notifyListeners();
 
     // Ensure fetchOrders completes before closing the screen
-    await Provider.of<PatientHomeNotifier>(context, listen: false)
-        .fetchOrders();
+    // await Provider.of<PatientHomeNotifier>(context, listen: false)
+    //     .fetchOrders();
 
-    Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Order placed for $_selectedMedicine')),
     );
@@ -140,9 +137,9 @@ class AddOrderNotifier extends ChangeNotifier {
           .doc(newIndex.toString())
           .set(newBlock.toJson());
 
-      // print("New block added to orderChain successfully!");
+      print("New block added to orderChain successfully!");
     } catch (e) {
-      // print("Error adding block to orderChain: $e");
+      print("Error adding block to orderChain: $e");
     }
   }
 }

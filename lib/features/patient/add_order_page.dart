@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/features/patient/add_order_notifier.dart';
+import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
 import 'package:provider/provider.dart';
 
 class AddOrderPage extends StatelessWidget {
@@ -66,11 +67,14 @@ class AddOrderPage extends StatelessWidget {
                               'id': orderId,
                               'orderedBy': '${loggedInUser.name}_$patientId',
                               'orderedById': '$patientId',
+                              'patient_name': loggedInUser.name,
+                              'patient_id': '$patientId',
                               'medicine': notifier.selectedMedicine,
-                              'current_handler': "Patient",
+                              'current_handler': "Manufacturer",
                               'currentTransistStatement':
                                   "Order is Placed By Patient",
                               'delivered': false,
+                              'hospital_name': 'NA',
                               'hospital_id': "NA",
                               'latestModifiedBy':
                                   '${loggedInUser.name}_$patientId',
@@ -80,6 +84,10 @@ class AddOrderPage extends StatelessWidget {
                                   DateTime.now().toIso8601String(),
                             };
                             notifier.placeOrder(context, orderData);
+                            Navigator.of(context).pop();
+                            Provider.of<PatientHomeNotifier>(context,
+                                    listen: false)
+                                .fetchOrders();
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,

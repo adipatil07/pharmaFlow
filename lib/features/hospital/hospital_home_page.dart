@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
+import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/hospital/add_hospital_order.dart';
 import 'package:pharma_supply/features/hospital/notifier/hospital_notifier.dart';
 import 'package:pharma_supply/widgets/tracking_card.dart';
@@ -17,6 +19,15 @@ class HospitalHomePage extends StatelessWidget {
           title: Text('Hospital Home',
               style: AppTheme.headlineTextStyle.copyWith(color: Colors.white)),
           backgroundColor: AppTheme.primaryColor,
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => LoginPage()));
+                },
+                icon: Icon(Icons.logout))
+          ],
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -119,10 +130,10 @@ Widget _buildTrackOrders(HospitalNotifier notifier) {
                     subtitle: Text("Order Id: ${order['id']}"),
                     children: [
                       TrackingCard(
-                        trackingId: order['id'],
-                        status: 'Status',
-                        currentStep: 1,
-                        hasHospitalStep: true,
+                        orderId: order['id'],
+                        // status: 'Status',
+                        // currentStep: 1,
+                        // hasHospitalStep: true,
                       ),
                     ],
                   ),

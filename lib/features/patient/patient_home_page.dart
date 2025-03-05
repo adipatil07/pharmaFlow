@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
+import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/patient/add_order_page.dart';
 import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
 import 'package:pharma_supply/widgets/tracking_card.dart';
@@ -17,6 +19,15 @@ class PatientHomePage extends StatelessWidget {
           title: Text('Patient Home',
               style: AppTheme.headlineTextStyle.copyWith(color: Colors.white)),
           backgroundColor: AppTheme.primaryColor,
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => LoginPage()));
+                },
+                icon: Icon(Icons.logout))
+          ],
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -41,17 +52,18 @@ class PatientHomePage extends StatelessWidget {
                     onPressed: (index) {
                       notifier.updateIndex(index);
                       notifier.fetchOrders();
+                      notifier.fetchPastOrders();
                     },
                     children: const [
                       Padding(
                         padding:
                             EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        child: Text("Past Orders"),
+                        child: Text("Active Orders"),
                       ),
                       Padding(
                         padding:
                             EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        child: Text("Track Orders"),
+                        child: Text("Past Orders"),
                       ),
                     ],
                   );
@@ -62,8 +74,8 @@ class PatientHomePage extends StatelessWidget {
               child: Consumer<PatientHomeNotifier>(
                 builder: (context, notifier, child) {
                   return notifier.selectedIndex == 0
-                      ? _buildPastOrders()
-                      : _buildTrackOrders(notifier);
+                      ? _buildTrackOrders(notifier)
+                      : _buildPastOrders(notifier);
                 },
               ),
             ),
@@ -118,10 +130,10 @@ Widget _buildTrackOrders(PatientHomeNotifier notifier) {
                     subtitle: Text("Order Id: ${order['id']}"),
                     children: [
                       TrackingCard(
-                        trackingId: order['id'],
-                        status: 'Status',
-                        currentStep: 1,
-                        hasHospitalStep: true,
+                        orderId: order['id'],
+                        // status: order['status'],
+                        // currentStep: 1,
+                        // hasHospitalStep: true,
                       ),
                     ],
                   ),
@@ -130,9 +142,48 @@ Widget _buildTrackOrders(PatientHomeNotifier notifier) {
             );
 }
 
-Widget _buildPastOrders() {
-  return const Center(
-    child: Text("Past Orders (Coming Soon)",
-        style: TextStyle(color: Colors.black54)),
-  );
+Widget _buildPastOrders(PatientHomeNotifier notifier) {
+  return notifier.isLoading
+      ? const Center(child: CircularProgressIndicator())
+      : notifier.pastOrders.isEmpty
+          ? const Center(
+              child: Text("No active orders.",
+                  style: TextStyle(color: Colors.black54)),
+            )
+          : ListView.builder(
+              itemCount: notifier.pastOrders.length,
+              itemBuilder: (context, index) {
+                final order = notifier.pastOrders[index];
+                return Card(
+                  color: AppTheme.cardColor,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ExpansionTile(
+                    childrenPadding: EdgeInsets.symmetric(vertical: 15),
+                    tilePadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    title: Text(
+                      order['medicine'],
+                      style: AppTheme.bodyTextStyle.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text("Order Id: ${order['id']}"),
+                    children: [
+                      TrackingCard(
+                        orderId: order['id'],
+                        // status: 'Status',
+                        // currentStep: 1,
+                        // hasHospitalStep: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
 }

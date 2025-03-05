@@ -5,6 +5,7 @@ import 'package:pharma_supply/features/auth/splash_screen.dart';
 import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
 import 'package:pharma_supply/features/patient/add_order_notifier.dart';
 import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
+import 'package:pharma_supply/features/transporter/notifier/transporter_notifier.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -22,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ManufacturerNotifier()),
         ChangeNotifierProvider(create: (_) => AddOrderNotifier()),
         ChangeNotifierProvider(create: (_) => PatientHomeNotifier()),
+        ChangeNotifierProvider(create: (_) => TransporterNotifier()),
       ],
       child: const MyApp(),
     ),
@@ -35,10 +37,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PharmaFlow',
-      theme: AppTheme.lightTheme,
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen()
-    );
+        title: 'PharmaFlow',
+        theme: AppTheme.lightTheme,
+        debugShowCheckedModeBanner: false,
+        home: SplashScreen());
   }
 }

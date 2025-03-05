@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pharma_supply/constants/order_block.dart';
+import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 
 class AddHospitalOrderNotifier extends ChangeNotifier {
@@ -41,8 +42,10 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').where('type', isEqualTo: 'Patient').get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('type', isEqualTo: 'Patient')
+        .get();
     _patientsList = snapshot.docs.map((doc) {
       return {
         'id': doc.id,
@@ -61,7 +64,8 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
 
   void selectPatient(String? patientId) {
     _selectedPatient = patientId;
-    _selectedPatientName = _patientsList.firstWhere((p) => p['id'] == patientId)['name'];
+    _selectedPatientName =
+        _patientsList.firstWhere((p) => p['id'] == patientId)['name'];
     notifyListeners();
   }
 
@@ -78,7 +82,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
 
     String? hospitalId = FirebaseAuth.instance.currentUser?.uid;
     String orderId = DateTime.now().millisecondsSinceEpoch.toString();
-
+    UserModel hospitalData = await FirebaseService.loggedInUser();
     Map<String, dynamic> orderData = {
       'id': orderId,
       'orderedBy': 'Hospital_$hospitalId',
@@ -88,14 +92,18 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
       'currentTransistStatement': "Order Placed by Hospital",
       'delivered': false,
       'hospital_id': hospitalId,
-      'latestModifiedBy': 'Hospital_$hospitalId',
+      'hospital_name': hospitalData.name,
+      'latestModifiedBy': '${hospitalData.name}_$hospitalId',
       'latestModifiedTimestamp': DateTime.now().toIso8601String(),
       'orderTimestamp': DateTime.now().toIso8601String(),
       'patient_id': _selectedPatient,
       'patient_name': _selectedPatientName,
     };
 
-    await FirebaseFirestore.instance.collection('Orders').doc(orderId).set(orderData);
+    await FirebaseFirestore.instance
+        .collection('Orders')
+        .doc(orderId)
+        .set(orderData);
     await createOrderBlockchain(orderData);
 
     _isLoading = false;
@@ -117,7 +125,8 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
           index: 0,
           previousHash: "0",
           nonce: 1,
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          hash:
+              'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
           order: 'Genesis Block',
           timeStamp: '',
           label: "0th Block",

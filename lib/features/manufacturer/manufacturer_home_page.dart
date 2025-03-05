@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
@@ -213,9 +212,9 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                                 '${loggedInUser.name}_${loggedInUser.id}',
                             "latestModifiedTimestamp":
                                 DateTime.now().toIso8601String(),
-                            "current_handler": "Manufacturer",
                             "currentTransistStatement":
-                                "Manufacturing to Transporter"
+                                "Manufacturing to Transporter",
+                            "status": "Pending"
                           });
                         } catch (e) {
                           print("error");
@@ -248,7 +247,9 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _showCancelOrderDialog(context, order['id']);
+                      },
                       icon: Icon(
                         Icons.close,
                         color: Colors.red,
@@ -263,4 +264,70 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
       },
     );
   }
+}
+
+void _showCancelOrderDialog(BuildContext context, String orderId) {
+  TextEditingController reasonController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(
+          "Cancel Order",
+          style: AppTheme.headlineTextStyle,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Please provide a reason for cancellation:"),
+            const SizedBox(height: 10),
+            TextField(
+              controller: reasonController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: "Enter reason...",
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Close"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (reasonController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Reason cannot be empty!")),
+                );
+                return;
+              }
+
+              try {
+                UserModel loggedInUser = await FirebaseService.loggedInUser();
+                await FirebaseService.updateOrderDetails(orderId, {
+                  // "status": "Cancelled",
+                  "cancelReason": reasonController.text,
+                  "latestModifiedBy": '${loggedInUser.name}_${loggedInUser.id}',
+                  "latestModifiedTimestamp": DateTime.now().toIso8601String(),
+                  "current_handler": "Patient",
+                });
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Order cancelled successfully!")),
+                );
+                Navigator.pop(context);
+              } catch (e) {
+                print("Error cancelling order: $e");
+              }
+            },
+            child: Text("Confirm"),
+          ),
+        ],
+      );
+    },
+  );
 }
