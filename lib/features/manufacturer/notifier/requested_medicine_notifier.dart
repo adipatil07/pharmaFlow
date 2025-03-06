@@ -1,3 +1,4 @@
+
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,12 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:pharma_supply/constants/block.dart';
 import 'package:pharma_supply/features/manufacturer/models/medical_product_model.dart';
-import 'package:pharma_supply/features/manufacturer/notifier/manufacturer_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 import 'package:pharma_supply/widgets/snackbar_helper.dart';
-import 'package:provider/provider.dart';
 
-class AddProductProvider extends ChangeNotifier {
+
+class RequestedMedicineNotifier extends ChangeNotifier{
   final formKey = GlobalKey<FormState>();
 
   // Text Controllers
@@ -102,29 +102,17 @@ class AddProductProvider extends ChangeNotifier {
         .then((v) async {
       Map<String, dynamic> lastProductBlock =
           await FirebaseService.getLastProductsChainBlock();
-      Block lastBlock;
-      if (lastProductBlock.isEmpty) {
-        lastBlock = Block(
-          index: 0,
-          previousHash: "0",
-          nonce: 1,
-          hash:
-              'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-          timeStamp: '',
-          product: 'Genesis Block',
-        );
-      } else {
-        lastBlock = Block.fromJson(lastProductBlock);
-      }
+      Block lastBlock = Block.fromJson(lastProductBlock);
       Block newBlock = Block.mineBlock(
           lastBlock.index + 1, lastBlock.hash, medicalTablet.serialNumber, 2);
       await addBlock(newBlock.toJson(), lastBlock.index + 1);
     });
-    Provider.of<ManufacturerNotifier>(context, listen: false).fetchMedicines();
+    // Provider.of<ManufacturerNotifier>(context, listen: false).fetchMedicines();
     SnackBarHelper.showSnackBar(context, "Product successfully added.",
         backgroundColor: Colors.green, textColor: Colors.white);
 
     showLoadingOnButton = false;
+    
     Navigator.pop(context);
     notifyListeners();
   }

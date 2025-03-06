@@ -9,17 +9,17 @@ class Block {
   final String hash;
   final String timeStamp;
   final String product;
-  final String label;
+  // final String label;
 
-  Block({
-    required this.index,
-    required this.previousHash,
-    required this.nonce,
-    required this.hash,
-    required this.timeStamp,
-    required this.product,
-    required this.label
-  });
+  Block(
+      {required this.index,
+      required this.previousHash,
+      required this.nonce,
+      required this.hash,
+      required this.timeStamp,
+      required this.product,
+      // required this.label,
+      });
 
   Map<String, dynamic> toJson() {
     return {
@@ -29,7 +29,7 @@ class Block {
       'hash': hash,
       'timeStamp': timeStamp,
       'product': product,
-      'label':label,
+      // 'label': label,
     };
   }
 
@@ -38,10 +38,10 @@ class Block {
       index: json['index'],
       previousHash: json['previousHash'],
       nonce: json['nonce'],
-      hash: json['hash'],
+      hash: json['hash'] ?? '',
       timeStamp: json['timeStamp'],
       product: json['product'],
-      label:json['label'],
+      // label: json['label'],
     );
   }
 
@@ -53,8 +53,8 @@ class Block {
   }
 
   // Mine a block (find a nonce that satisfies difficulty)
-  static Block mineBlock(
-      int index, String previousHash, String product, int difficulty,String label) {
+  static Block mineBlock(int index, String previousHash, String product,
+      int difficulty) {
     int nonce = 0;
     String hash;
     final String data = product;
@@ -71,7 +71,8 @@ class Block {
       nonce: nonce,
       hash: hash,
       timeStamp: timeStamp,
-      product: product, label: label,
+      product: product,
+      // label: label,
     );
   }
 }

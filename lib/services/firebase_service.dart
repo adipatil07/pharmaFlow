@@ -151,4 +151,10 @@ class FirebaseService {
         FirebaseFirestore.instance.collection('Orders').doc(id);
     await orderRef.update(data);
   }
+
+  static Future<void> updateRequestedMedicineDetails(String id, Map<String, dynamic> data) async {
+    DocumentReference orderRef =
+        FirebaseFirestore.instance.collection('RequestedMedicines').doc(id);
+    await orderRef.update(data);
+  }
 }

@@ -88,7 +88,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
       'orderedBy': 'Hospital_$hospitalId',
       'orderedById': hospitalId,
       'medicine': _selectedMedicine,
-      'current_handler': "Hospital",
+      'current_handler': "Manufacturer",
       'currentTransistStatement': "Order Placed by Hospital",
       'delivered': false,
       'hospital_id': hospitalId,
@@ -112,6 +112,40 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Order placed for $_selectedMedicine')),
+    );
+  }
+
+  Future<void> placeMedicineOrder(BuildContext context, String text) async {
+    _isLoading = true;
+    notifyListeners();
+
+    String? hospitalId = FirebaseAuth.instance.currentUser?.uid;
+    String orderId = DateTime.now().millisecondsSinceEpoch.toString();
+    UserModel hospitalData = await FirebaseService.loggedInUser();
+    Map<String, dynamic> orderData = {
+      'id': orderId,
+      'orderedBy': 'Hospital_$hospitalId',
+      'orderedById': hospitalId,
+      'medicine': text,
+      'currentTransistStatement': "Medicine Requested by Hospital",
+      'delivered': false,
+      'hospital_id': hospitalId,
+      'hospital_name': hospitalData.name,
+      'latestModifiedBy': '${hospitalData.name}_$hospitalId',
+      'latestModifiedTimestamp': DateTime.now().toIso8601String(),
+      'orderTimestamp': DateTime.now().toIso8601String(),
+      'status': 'Requested',
+    };
+
+    await FirebaseFirestore.instance
+        .collection('RequestedMedicines')
+        .doc(orderId)
+        .set(orderData);
+
+    _isLoading = false;
+    notifyListeners();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Order placed Successfully')),
     );
   }
 
@@ -144,7 +178,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
         2,
         'Order Created By Hospital',
         orderData['orderedBy'],
-        'Distributor');
+        'Manufacturer');
 
     await FirebaseFirestore.instance
         .collection('Orders')

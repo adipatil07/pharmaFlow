@@ -7,6 +7,10 @@ class HospitalNotifier extends ChangeNotifier {
   bool isLoading = false;
   List<Map<String, dynamic>> orders = [];
 
+  List<Map<String, dynamic>> _pastOrders = [];
+
+  List<Map<String, dynamic>> get pastOrders => _pastOrders;
+
   void updateIndex(int index) {
     selectedIndex = index;
     notifyListeners();
@@ -21,6 +25,7 @@ class HospitalNotifier extends ChangeNotifier {
           .collection('Orders')
           .where("hospital_id",
               isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where('delivered', isEqualTo: false)
           .get();
 
       orders = snapshot.docs.map((doc) {
@@ -35,6 +40,29 @@ class HospitalNotifier extends ChangeNotifier {
       print("Error fetching orders: $e");
     }
 
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchPastOrders() async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      String userId = FirebaseAuth.instance.currentUser?.uid ?? "";
+      if (userId.isEmpty) return;
+
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Orders')
+          .where('orderedById', isEqualTo: userId)
+          .where('delivered', isEqualTo: true)
+          .get();
+
+      _pastOrders = querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      print("Error fetching orders: $e");
+    }
     isLoading = false;
     notifyListeners();
   }

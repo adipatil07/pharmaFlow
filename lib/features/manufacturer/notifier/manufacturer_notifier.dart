@@ -5,15 +5,40 @@ import 'package:firebase_auth/firebase_auth.dart';
 class ManufacturerNotifier extends ChangeNotifier {
   List<Map<String, dynamic>> _medicines = [];
   List<Map<String, dynamic>> _orders = [];
+  List<Map<String, dynamic>> _requestedOrders = [];
   bool _isLoading = false;
+  int selectedIndex = 0;
 
   List<Map<String, dynamic>> get medicines => _medicines;
   List<Map<String, dynamic>> get orders => _orders;
+  List<Map<String, dynamic>> get requestedOrders => _requestedOrders;
   bool get isLoading => _isLoading;
 
   ManufacturerNotifier() {
     fetchMedicines();
     fetchOrders();
+  }
+
+  void updateIndex(int index) {
+    selectedIndex = index;
+    notifyListeners();
+  }
+
+  Future<void> fetchRequestedOrders() async {
+    _isLoading = true;
+    notifyListeners();
+    // String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('RequestedMedicines')
+          .where('status', isEqualTo: 'Requested')
+          .get();
+      _requestedOrders = snapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      _requestedOrders = [];
+    }
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> fetchMedicines() async {
