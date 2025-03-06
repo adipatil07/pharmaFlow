@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/hospital/add_hospital_order.dart';
-import 'package:pharma_supply/features/hospital/notifier/add_hospital_order_notifier.dart';
 import 'package:pharma_supply/features/hospital/notifier/hospital_notifier.dart';
 import 'package:pharma_supply/widgets/tracking_card.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +13,7 @@ class HospitalHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => HospitalNotifier()..fetchOrders(),
+      create: (_) => HospitalNotifier(),
       child: Scaffold(
         appBar: AppBar(
           title: Text('Hospital Home',
@@ -93,8 +92,7 @@ class HospitalHomePage extends StatelessWidget {
                   } else if (notifier.selectedIndex == 1) {
                     return _buildPastOrders(notifier);
                   } else {
-                    return _buildRequestMedicine(
-                        context, AddHospitalOrderNotifier());
+                    return _buildRequestMedicine(context, notifier);
                   }
                 },
               ),
@@ -203,8 +201,7 @@ Widget _buildPastOrders(HospitalNotifier notifier) {
             );
 }
 
-Widget _buildRequestMedicine(
-    BuildContext context, AddHospitalOrderNotifier notifier) {
+Widget _buildRequestMedicine(BuildContext context, HospitalNotifier notifier) {
   TextEditingController medicineController = TextEditingController();
 
   return Padding(
@@ -226,6 +223,23 @@ Widget _buildRequestMedicine(
             ),
           ),
         ),
+        SizedBox(
+          height: 15,
+        ),
+        DropdownButtonFormField<String>(
+          decoration: const InputDecoration(
+            labelText: 'Select Manufacturer',
+            border: OutlineInputBorder(),
+          ),
+          value: notifier.selectedManufacturer,
+          items: notifier.manufacturersList.map((manufacturer) {
+            return DropdownMenuItem<String>(
+              value: manufacturer['id'],
+              child: Text(manufacturer['name'], style: AppTheme.bodyTextStyle),
+            );
+          }).toList(),
+          onChanged: notifier.selectManufacturer,
+        ),
         const SizedBox(height: 16),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -233,13 +247,15 @@ Widget _buildRequestMedicine(
           ),
           onPressed: () {
             String requestedMedicine = medicineController.text.trim();
-            if (requestedMedicine.isNotEmpty) {
+            if (requestedMedicine.isNotEmpty &&
+                notifier.selectedManufacturer != null) {
               notifier.placeMedicineOrder(context, requestedMedicine);
               medicineController.clear();
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text("Please enter medicine name."),
+                  content:
+                      Text("Please enter medicine name & Manufacturer name."),
                 ),
               );
             }

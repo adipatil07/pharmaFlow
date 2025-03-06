@@ -11,6 +11,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
   String? _selectedPatientName;
   List<String> _medicineList = [];
   List<Map<String, dynamic>> _patientsList = [];
+
   bool _isLoading = false;
   bool _isButtonLoading = false;
 
@@ -63,6 +64,8 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  
+
   void selectMedicine(String? medicine) {
     _selectedMedicine = medicine;
     notifyListeners();
@@ -78,12 +81,12 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
   Future<void> placeOrder(BuildContext context) async {
     if (_selectedMedicine == null || _selectedPatient == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a patient and medicine.')),
+        const SnackBar(content: Text('Please select a patient, medicine.')),
       );
       return;
     }
 
-    _isLoading = true;
+    _isButtonLoading = true;
     notifyListeners();
 
     String? hospitalId = FirebaseAuth.instance.currentUser?.uid;
@@ -112,7 +115,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
         .set(orderData);
     await createOrderBlockchain(orderData);
 
-    _isLoading = false;
+    _isButtonLoading = false;
     notifyListeners();
 
     Navigator.of(context).pop();
@@ -121,39 +124,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
     );
   }
 
-  Future<void> placeMedicineOrder(BuildContext context, String text) async {
-    isButtonLoading = true;
-    notifyListeners();
-
-    String? hospitalId = FirebaseAuth.instance.currentUser?.uid;
-    String orderId = DateTime.now().millisecondsSinceEpoch.toString();
-    UserModel hospitalData = await FirebaseService.loggedInUser();
-    Map<String, dynamic> orderData = {
-      'id': orderId,
-      'orderedBy': 'Hospital_$hospitalId',
-      'orderedById': hospitalId,
-      'medicine': text,
-      'currentTransistStatement': "Medicine Requested by Hospital",
-      'delivered': false,
-      'hospital_id': hospitalId,
-      'hospital_name': hospitalData.name,
-      'latestModifiedBy': '${hospitalData.name}_$hospitalId',
-      'latestModifiedTimestamp': DateTime.now().toIso8601String(),
-      'orderTimestamp': DateTime.now().toIso8601String(),
-      'status': 'Requested',
-    };
-
-    await FirebaseFirestore.instance
-        .collection('RequestedMedicines')
-        .doc(orderId)
-        .set(orderData);
-
-    isButtonLoading = false;
-    notifyListeners();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Order placed Successfully')),
-    );
-  }
+  
 
   Future<void> createOrderBlockchain(Map<String, dynamic> orderData) async {
     Map<String, dynamic>? lastBlockData =
