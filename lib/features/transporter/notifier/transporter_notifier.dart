@@ -45,7 +45,6 @@ class TransporterNotifier extends ChangeNotifier {
       activeOrders =
           orders.where((order) => order['status'] != 'Pending').toList();
     } catch (e) {
-      print("Error fetching orders: $e");
     }
 
     isLoading = false;
@@ -78,7 +77,7 @@ class TransporterNotifier extends ChangeNotifier {
       pastOrders =
           pastOrders.where((order) => order['status'] != 'Pending').toList();
     } catch (e) {
-      print("Error fetching orders: $e");
+      // print("Error fetching orders: $e");
     }
 
     isLoading = false;

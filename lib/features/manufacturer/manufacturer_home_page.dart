@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/auth/models/user_model.dart';
@@ -20,7 +19,7 @@ class ManufacturerHomePage extends StatefulWidget {
 }
 
 class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
-  int _selectedIndex = 0;
+
 
   @override
   void initState() {

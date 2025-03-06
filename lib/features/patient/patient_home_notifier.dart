@@ -35,7 +35,7 @@ class PatientHomeNotifier extends ChangeNotifier {
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
     } catch (e) {
-      print("Error fetching orders: $e");
+      // print("Error fetching orders: $e");
     }
     _isLoading = false;
     notifyListeners();
@@ -58,7 +58,7 @@ class PatientHomeNotifier extends ChangeNotifier {
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
     } catch (e) {
-      print("Error fetching orders: $e");
+      // print("Error fetching orders: $e");
     }
     _isLoading = false;
     notifyListeners();

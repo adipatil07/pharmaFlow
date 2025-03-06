@@ -147,7 +147,7 @@ Widget _buildPastOrders(PatientHomeNotifier notifier) {
       ? const Center(child: CircularProgressIndicator())
       : notifier.pastOrders.isEmpty
           ? const Center(
-              child: Text("No active orders.",
+              child: Text("No Past orders.",
                   style: TextStyle(color: Colors.black54)),
             )
           : ListView.builder(

@@ -12,6 +12,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
   List<String> _medicineList = [];
   List<Map<String, dynamic>> _patientsList = [];
   bool _isLoading = false;
+  bool _isButtonLoading = false;
 
   String? get selectedMedicine => _selectedMedicine;
   String? get selectedPatient => _selectedPatient;
@@ -19,6 +20,11 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
   List<String> get medicineList => _medicineList;
   List<Map<String, dynamic>> get patientsList => _patientsList;
   bool get isLoading => _isLoading;
+  bool get isButtonLoading => _isButtonLoading;
+  set isButtonLoading(bool value) {
+    _isButtonLoading = value;
+    notifyListeners();
+  }
 
   AddHospitalOrderNotifier() {
     fetchMedicinesList();
@@ -116,7 +122,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
   }
 
   Future<void> placeMedicineOrder(BuildContext context, String text) async {
-    _isLoading = true;
+    isButtonLoading = true;
     notifyListeners();
 
     String? hospitalId = FirebaseAuth.instance.currentUser?.uid;
@@ -142,7 +148,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
         .doc(orderId)
         .set(orderData);
 
-    _isLoading = false;
+    isButtonLoading = false;
     notifyListeners();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Order placed Successfully')),

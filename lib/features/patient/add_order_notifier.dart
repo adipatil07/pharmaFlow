@@ -137,9 +137,9 @@ class AddOrderNotifier extends ChangeNotifier {
           .doc(newIndex.toString())
           .set(newBlock.toJson());
 
-      print("New block added to orderChain successfully!");
+      // print("New block added to orderChain successfully!");
     } catch (e) {
-      print("Error adding block to orderChain: $e");
+      // print("Error adding block to orderChain: $e");
     }
   }
 }

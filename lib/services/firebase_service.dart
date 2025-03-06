@@ -49,16 +49,13 @@ class FirebaseService {
           .doc(orderId)
           .collection('orderChain') // Access order's orderChain
           .get();
-      print(orderId);
       if (orderChainSnapshot.docs.isNotEmpty) {
         return orderChainSnapshot.docs.last
             .data(); // Return latest orderChain block
       } else {
         return {};
       }
-    } catch (e) {
-      print("Error fetching latest orderChain block: $e");
-    }
+    } catch (e) {}
 
     return {}; // Return empty if no data found
   }
@@ -152,7 +149,8 @@ class FirebaseService {
     await orderRef.update(data);
   }
 
-  static Future<void> updateRequestedMedicineDetails(String id, Map<String, dynamic> data) async {
+  static Future<void> updateRequestedMedicineDetails(
+      String id, Map<String, dynamic> data) async {
     DocumentReference orderRef =
         FirebaseFirestore.instance.collection('RequestedMedicines').doc(id);
     await orderRef.update(data);

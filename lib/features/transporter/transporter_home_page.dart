@@ -58,7 +58,11 @@ class TransporterHomePage extends StatelessWidget {
                           ],
                           onPressed: (index) {
                             notifier.updateScreen(index);
-                            notifier.fetchTransporterOrders();
+                            if (index == 0) {
+                              notifier.fetchTransporterOrders();
+                            } else if (index == 1) {
+                              notifier.fetchPastTransporterOrders();
+                            }
                           },
                           children: const [
                             Padding(
@@ -114,7 +118,7 @@ class TransporterHomePage extends StatelessWidget {
           final order = notifier.pastOrders[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: _buildOrderTile(context, order, notifier),
+            child: _buildOrderTile(context, order, notifier, isPastOrder: true),
           );
         },
       );
@@ -148,7 +152,8 @@ class TransporterHomePage extends StatelessWidget {
   }
 
   Widget _buildOrderTile(BuildContext context, Map<String, dynamic> order,
-      TransporterNotifier notifier) {
+      TransporterNotifier notifier,
+      {bool isPastOrder = false}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
@@ -195,12 +200,13 @@ class TransporterHomePage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _infoColumn("Patient ID", order['patient_name'] ?? "N/A"),
+              _infoColumn("Patient Name", order['patient_name'] ?? "N/A"),
               _infoColumn("Hospital", order['hospital_name'] ?? "N/A"),
             ],
           ),
           const SizedBox(height: 15),
-          if (order['status'] != "Accepted" &&
+          if (!isPastOrder &&
+              order['status'] != "Accepted" &&
               order['status'] != "Picked Up" &&
               order['status'] != "In Transit" &&
               order['status'] != "Delivered")
@@ -248,7 +254,7 @@ class TransporterHomePage extends StatelessWidget {
                 ),
               ],
             )
-          else
+          else if (!isPastOrder)
             SizedBox(
               height: 60, // Adjust height as needed
               child: DropdownButtonFormField<String>(
@@ -284,7 +290,6 @@ class TransporterHomePage extends StatelessWidget {
                               listen: false)
                           .addBlockToOrderChain(orderData);
                     } else {
-                      print("Error: Order ID is null");
                     }
                     UserModel loggedInUser =
                         await FirebaseService.loggedInUser();
@@ -298,7 +303,6 @@ class TransporterHomePage extends StatelessWidget {
                       "currentTransistStatement": newStatus
                     });
                   } catch (e) {
-                    print("error");
                   }
                 },
               ),

@@ -59,6 +59,8 @@ class HospitalHomePage extends StatelessWidget {
                           notifier.fetchOrders();
                         } else if (index == 1) {
                           notifier.fetchPastOrders();
+                        } else if (index == 2) {
+                          notifier.fetchRequestedOrders();
                         }
                       },
                       children: const [
@@ -163,7 +165,7 @@ Widget _buildPastOrders(HospitalNotifier notifier) {
       ? const Center(child: CircularProgressIndicator())
       : notifier.pastOrders.isEmpty
           ? const Center(
-              child: Text("No active orders.",
+              child: Text("No Past orders.",
                   style: TextStyle(color: Colors.black54)),
             )
           : ListView.builder(
@@ -193,9 +195,6 @@ Widget _buildPastOrders(HospitalNotifier notifier) {
                     children: [
                       TrackingCard(
                         orderId: order['id'],
-                        // status: 'Status',
-                        // currentStep: 1,
-                        // hasHospitalStep: true,
                       ),
                     ],
                   ),
@@ -233,21 +232,102 @@ Widget _buildRequestMedicine(
             backgroundColor: AppTheme.primaryColor,
           ),
           onPressed: () {
-            // if (notifier.isLoading) {
-            //   const CircularProgressIndicator(color: Colors.white);
-            // } else {
             String requestedMedicine = medicineController.text.trim();
             if (requestedMedicine.isNotEmpty) {
-              // Handle the medicine request submission
               notifier.placeMedicineOrder(context, requestedMedicine);
-              print("Requested Medicine: $requestedMedicine");
+              medicineController.clear();
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Please enter medicine name."),
+                ),
+              );
             }
-            // }
           },
-          child: const Text("Request Medicine",
-              style: TextStyle(color: Colors.white)),
+          child: notifier.isButtonLoading
+              ? const CircularProgressIndicator()
+              : const Text(
+                  "Request Medicine",
+                  style: TextStyle(color: Colors.white),
+                ),
+        ),
+        const SizedBox(height: 20),
+        Expanded(
+          child: Consumer<HospitalNotifier>(
+            builder: (context, notifier, child) {
+              if (notifier.requestedOrders.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No requested medicines.",
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                );
+              }
+              return ListView.builder(
+                itemCount: notifier.requestedOrders.length,
+                itemBuilder: (context, index) {
+                  final medicine = notifier.requestedOrders[index];
+                  return Card(
+                    color: AppTheme.cardColor,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      title: Text(
+                        medicine['medicine'],
+                        style: AppTheme.bodyTextStyle.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Text(
+                        "Order Id: ${medicine['id']}",
+                        style: AppTheme.bodyTextStyle.copyWith(
+                          color: Colors.black54,
+                          fontSize: 14,
+                        ),
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(medicine['status']),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          medicine['status'],
+                          style: AppTheme.bodyTextStyle.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ],
     ),
   );
+}
+
+Color _getStatusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'requested':
+      return Colors.orange;
+    case 'approved':
+      return Colors.green;
+    case 'rejected':
+      return Colors.red;
+    default:
+      return Colors.blueGrey;
+  }
 }

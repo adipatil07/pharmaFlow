@@ -40,11 +40,11 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 60),
+                SizedBox(height: 80),
                 _buildLogo(),
-                SizedBox(height: 20),
-                _buildUserTypeSelector(),
-                SizedBox(height: 40),
+                SizedBox(height: 30),
+                // _buildUserTypeSelector(),
+                // SizedBox(height: 40),
                 _buildLoginForm(),
                 SizedBox(height: 30),
                 _buildRegisterLink(),
@@ -74,63 +74,6 @@ class _LoginPageState extends State<LoginPage> {
           style: AppTheme.headlineTextStyle.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUserTypeSelector() {
-    return Column(
-      children: [
-        Text(
-          'Select User Role',
-          style: AppTheme.subtitleTextStyle.copyWith(color: Colors.white),
-        ),
-        SizedBox(height: 16),
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: AppTheme.cardColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: UserType.values.map((userType) {
-                final isSelected = selectedUserType == userType;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: ChoiceChip(
-                    label: Text(_getUserTypeLabel(userType),
-                        style: AppTheme.chipTextStyle),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        selectedUserType = userType;
-                      });
-                    },
-                    backgroundColor: Colors.transparent,
-                    selectedColor: AppTheme.accentColor.withOpacity(0.3),
-                    avatar: Icon(
-                      _getUserTypeIcon(userType),
-                      color:
-                          isSelected ? Colors.transparent : AppTheme.iconColor,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: isSelected
-                            ? AppTheme.primaryColor
-                            : AppTheme.borderColor,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
           ),
         ),
       ],
@@ -272,33 +215,5 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  String _getUserTypeLabel(UserType userType) {
-    switch (userType) {
-      case UserType.Manufacturer:
-        return 'Manufacturer';
-      case UserType.Transporter:
-        return 'Transporter';
-      case UserType.Hospital:
-        return 'Hospital';
-      case UserType.MedicineStore:
-        return 'Medical Store';
-      case UserType.Patient:
-        return 'Patient';
-    }
-  }
 
-  IconData _getUserTypeIcon(UserType userType) {
-    switch (userType) {
-      case UserType.Manufacturer:
-        return Icons.factory;
-      case UserType.Transporter:
-        return Icons.local_shipping;
-      case UserType.Hospital:
-        return Icons.local_hospital;
-      case UserType.MedicineStore:
-        return Icons.medical_services;
-      case UserType.Patient:
-        return Icons.person;
-    }
-  }
 }
