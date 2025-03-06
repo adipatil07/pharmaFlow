@@ -47,11 +47,11 @@ class FirebaseService {
       final orderChainSnapshot = await _firestore
           .collection('Orders')
           .doc(orderId)
-          .collection('orderChain') // Access order's orderChain
+          .collection('orderChain') 
           .get();
       if (orderChainSnapshot.docs.isNotEmpty) {
         return orderChainSnapshot.docs.last
-            .data(); // Return latest orderChain block
+            .data(); 
       } else {
         return {};
       }

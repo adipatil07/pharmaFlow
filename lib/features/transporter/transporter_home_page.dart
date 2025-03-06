@@ -8,6 +8,7 @@ import 'package:pharma_supply/features/patient/add_order_notifier.dart';
 import 'package:pharma_supply/features/transporter/notifier/transporter_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_bar_code/qr/src/qr_code.dart';
 
 class TransporterHomePage extends StatelessWidget {
   const TransporterHomePage({super.key});
@@ -151,6 +152,24 @@ class TransporterHomePage extends StatelessWidget {
     }
   }
 
+  void _showQRCodeDialog(BuildContext context, String data) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          content: QRCode(data: data),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildOrderTile(BuildContext context, Map<String, dynamic> order,
       TransporterNotifier notifier,
       {bool isPastOrder = false}) {
@@ -193,7 +212,12 @@ class TransporterHomePage extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              const Icon(Icons.qr_code, size: 30, color: Colors.black),
+              GestureDetector(
+                  onTap: () {
+                    _showQRCodeDialog(context, order['id']);
+                  },
+                  child:
+                      const Icon(Icons.qr_code, size: 30, color: Colors.black)),
             ],
           ),
           const Divider(),
@@ -256,9 +280,9 @@ class TransporterHomePage extends StatelessWidget {
             )
           else if (!isPastOrder)
             SizedBox(
-              height: 60, // Adjust height as needed
+              height: 60,
               child: DropdownButtonFormField<String>(
-                value: order['status'],
+                value: order['status'] ?? "Pending",
                 decoration: InputDecoration(
                   labelText: "Update Status",
                   border: OutlineInputBorder(
@@ -289,8 +313,7 @@ class TransporterHomePage extends StatelessWidget {
                       await Provider.of<AddOrderNotifier>(context,
                               listen: false)
                           .addBlockToOrderChain(orderData);
-                    } else {
-                    }
+                    } else {}
                     UserModel loggedInUser =
                         await FirebaseService.loggedInUser();
                     await FirebaseService.updateOrderDetails(orderData['id'], {
@@ -302,8 +325,7 @@ class TransporterHomePage extends StatelessWidget {
                           newStatus == "Delivered " ? "Patient" : "Transporter",
                       "currentTransistStatement": newStatus
                     });
-                  } catch (e) {
-                  }
+                  } catch (e) {}
                 },
               ),
             ),

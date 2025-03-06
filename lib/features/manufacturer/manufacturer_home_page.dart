@@ -19,8 +19,6 @@ class ManufacturerHomePage extends StatefulWidget {
 }
 
 class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
-
-
   @override
   void initState() {
     super.initState();
@@ -75,7 +73,8 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                 isSelected: [
                   manufacturerNotifier.selectedIndex == 0,
                   manufacturerNotifier.selectedIndex == 1,
-                  manufacturerNotifier.selectedIndex == 2
+                  manufacturerNotifier.selectedIndex == 2,
+                  manufacturerNotifier.selectedIndex == 3
                 ],
                 onPressed: (index) {
                   if (index == 0) {
@@ -85,6 +84,9 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                     manufacturerNotifier.fetchOrders();
                   }
                   if (index == 2) {
+                    manufacturerNotifier.fetchPastOrders();
+                  }
+                  if (index == 3) {
                     manufacturerNotifier.fetchRequestedOrders();
                   }
                   manufacturerNotifier.updateIndex(index);
@@ -97,6 +99,10 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text("View Orders"),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Text("Past Orders"),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -113,6 +119,8 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
                 return _buildMedicinesList(notifier);
               } else if (notifier.selectedIndex == 1) {
                 return _buildOrdersList(notifier);
+              } else if (notifier.selectedIndex == 2) {
+                return _buildPastOrdersList(notifier);
               } else {
                 return _buildRequestedMedicinesList(notifier);
               }
@@ -387,6 +395,61 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
       },
     );
   }
+}
+
+Widget _buildPastOrdersList(ManufacturerNotifier notifier) {
+  if (notifier.isLoading) {
+    return const Center(child: CircularProgressIndicator());
+  }
+  if (notifier.pastOrders.isEmpty) {
+    return const Center(
+      child: Text(
+        "No Past Orders yet.",
+        style: TextStyle(color: Colors.black54),
+      ),
+    );
+  }
+  return ListView.builder(
+    itemCount: notifier.pastOrders.length,
+    itemBuilder: (context, index) {
+      var order = notifier.pastOrders[index];
+      return Card(
+        color: Colors.white,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Order ID: ${order['id']}",
+                    style: AppTheme.subtitleTextStyle.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryColor),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Medicine: ${order['medicine']}",
+                    style: AppTheme.chipTextStyle
+                        .copyWith(fontSize: 14, color: AppTheme.headlineColor),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 void _showCancelOrderDialog(BuildContext context, String orderId) {
