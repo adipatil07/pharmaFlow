@@ -30,20 +30,23 @@ class AddOrderPage extends StatelessWidget {
                 children: [
                   notifier.isLoading
                       ? const CircularProgressIndicator()
-                      : DropdownButtonFormField<String>(
+                      : DropdownButtonFormField<Map<String, dynamic>>(
                           decoration: const InputDecoration(
                             labelText: 'Select Medicine',
                             border: OutlineInputBorder(),
                           ),
                           value: notifier.selectedMedicine,
                           items: notifier.medicineList.map((medicine) {
-                            return DropdownMenuItem<String>(
+                            return DropdownMenuItem<Map<String, dynamic>>(
                               value: medicine,
-                              child:
-                                  Text(medicine, style: AppTheme.bodyTextStyle),
+                              child: Text(
+                                  '${medicine['productName']}-${medicine['manufacturerName']}',
+                                  style: AppTheme.bodyTextStyle),
                             );
                           }).toList(),
-                          onChanged: notifier.selectMedicine,
+                          onChanged: (value) {
+                            notifier.selectMedicine(value);
+                          },
                         ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -69,10 +72,15 @@ class AddOrderPage extends StatelessWidget {
                               'orderedById': '$patientId',
                               'patient_name': loggedInUser.name,
                               'patient_id': '$patientId',
-                              'medicine': notifier.selectedMedicine,
+                              'medicine':
+                                  notifier.selectedMedicine!['productName'],
                               'current_handler': "Manufacturer",
                               'currentTransistStatement':
                                   "Order is Placed By Patient",
+                              'manufacturer_id':
+                                  notifier.selectedMedicine!['manufacturerId'],
+                              'manufacturer_name':
+                                  notifier.selectedMedicine!['manufacturerName'],
                               'delivered': false,
                               'hospital_name': 'NA',
                               'hospital_id': "NA",

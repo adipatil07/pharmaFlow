@@ -5,16 +5,37 @@ import 'package:pharma_supply/constants/order_block.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 
 class AddOrderNotifier extends ChangeNotifier {
-  String? _selectedMedicine;
-  List<String> _medicineList = [];
+  Map<String, dynamic>? _selectedMedicine;
+  List<Map<String, dynamic>> _medicineList = [];
   bool _isLoading = false;
+  String? _selectedManufacturer;
+  String? _selectedManufacturerName;
+  List<Map<String, dynamic>> _manufacturersList = [];
 
-  String? get selectedMedicine => _selectedMedicine;
-  List<String> get medicineList => _medicineList;
+  String? get selectedManufacturer => _selectedManufacturer;
+  String? get selectedManufacturerName => _selectedManufacturerName;
+  List<Map<String, dynamic>> get manufacturersList => _manufacturersList;
+  Map<String, dynamic>? get selectedMedicine => _selectedMedicine;
+  List<Map<String, dynamic>> get medicineList => _medicineList;
   bool get isLoading => _isLoading;
 
   AddOrderNotifier() {
     fetchMedicinesList();
+    // fetchManufacturersList();
+  }
+
+  Future<void> fetchManufacturersList() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('type', isEqualTo: 'Manufacturer')
+        .get();
+    _manufacturersList = snapshot.docs.map((doc) {
+      return {
+        'id': doc.id,
+        'name': doc['name'],
+      };
+    }).toList();
+    notifyListeners();
   }
 
   Future<void> fetchMedicinesList() async {
@@ -23,14 +44,19 @@ class AddOrderNotifier extends ChangeNotifier {
 
     final snapshot =
         await FirebaseFirestore.instance.collection('Products').get();
-    _medicineList =
-        snapshot.docs.map((doc) => doc['productName'] as String).toList();
+    _medicineList = snapshot.docs
+        .map((doc) => {
+              'productName': doc['productName'] as String,
+              'manufacturerId': doc['manufacturerId'] as String,
+              'manufacturerName': doc['manufacturerName'] as String,
+            })
+        .toList();
 
     _isLoading = false;
     notifyListeners();
   }
 
-  void selectMedicine(String? medicine) {
+  void selectMedicine(Map<String, dynamic>? medicine) {
     _selectedMedicine = medicine;
     notifyListeners();
   }
@@ -46,11 +72,7 @@ class AddOrderNotifier extends ChangeNotifier {
     }
 
     _isLoading = true;
-    notifyListeners();
-
-    // String? patientId = FirebaseAuth.instance.currentUser?.uid;
-    // String? patientName = FirebaseAuth.instance.currentUser?.displayName;
-    // String orderId = DateTime.now().millisecondsSinceEpoch.toString();
+    if (context.mounted) notifyListeners();
 
     await FirebaseFirestore.instance
         .collection('Orders')
@@ -59,14 +81,12 @@ class AddOrderNotifier extends ChangeNotifier {
     await createOrderBlockchain(orderData);
 
     _isLoading = false;
-    notifyListeners();
-
-    // Ensure fetchOrders completes before closing the screen
-    // await Provider.of<PatientHomeNotifier>(context, listen: false)
-    //     .fetchOrders();
+    if (context.mounted) notifyListeners();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Order placed for $_selectedMedicine')),
+      SnackBar(
+          content:
+              Text('Order placed for ${_selectedMedicine?['productName']}')),
     );
   }
 

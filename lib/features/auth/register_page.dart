@@ -244,8 +244,8 @@ class _RegisterPageState extends State<RegisterPage> {
         return 'Transporter';
       case UserType.Hospital:
         return 'Hospital';
-      case UserType.MedicineStore:
-        return 'Medical Store';
+      // case UserType.MedicineStore:
+      //   return 'Medical Store';
       case UserType.Patient:
         return 'Patient';
     }
@@ -259,8 +259,6 @@ class _RegisterPageState extends State<RegisterPage> {
         return Icons.local_shipping;
       case UserType.Hospital:
         return Icons.local_hospital;
-      case UserType.MedicineStore:
-        return Icons.medical_services;
       case UserType.Patient:
         return Icons.person;
     }
