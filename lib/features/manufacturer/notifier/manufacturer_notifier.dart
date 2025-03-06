@@ -19,6 +19,8 @@ class ManufacturerNotifier extends ChangeNotifier {
   ManufacturerNotifier() {
     fetchMedicines();
     fetchOrders();
+    fetchRequestedOrders();
+    fetchPastOrders();
   }
 
   void updateIndex(int index) {
@@ -63,11 +65,12 @@ class ManufacturerNotifier extends ChangeNotifier {
   Future<void> fetchOrders() async {
     _isLoading = true;
     notifyListeners();
-    // String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
     try {
       var snapshot = await FirebaseFirestore.instance
           .collection('Orders')
           .where('current_handler', isEqualTo: "Manufacturer")
+          .where('manufacturer_id', isEqualTo: manufacturerId)
           .get();
       _orders = snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
@@ -80,11 +83,12 @@ class ManufacturerNotifier extends ChangeNotifier {
   Future<void> fetchPastOrders() async {
     _isLoading = true;
     notifyListeners();
-    // String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    String manufacturerId = FirebaseAuth.instance.currentUser?.uid ?? '';
     try {
       var snapshot = await FirebaseFirestore.instance
           .collection('Orders')
           .where('delivered', isEqualTo: true)
+          .where('manufacturer_id', isEqualTo: manufacturerId)
           .get();
       _pastOrders = snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
