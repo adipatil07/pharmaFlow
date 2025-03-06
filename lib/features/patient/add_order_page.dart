@@ -79,8 +79,8 @@ class AddOrderPage extends StatelessWidget {
                                   "Order is Placed By Patient",
                               'manufacturer_id':
                                   notifier.selectedMedicine!['manufacturerId'],
-                              'manufacturer_name':
-                                  notifier.selectedMedicine!['manufacturerName'],
+                              'manufacturer_name': notifier
+                                  .selectedMedicine!['manufacturerName'],
                               'delivered': false,
                               'hospital_name': 'NA',
                               'hospital_id': "NA",

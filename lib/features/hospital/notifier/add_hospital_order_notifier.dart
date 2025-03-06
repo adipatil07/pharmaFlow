@@ -6,20 +6,21 @@ import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 
 class AddHospitalOrderNotifier extends ChangeNotifier {
-  String? _selectedMedicine;
+  Map<String, dynamic>? _selectedMedicine;
   String? _selectedPatient;
   String? _selectedPatientName;
-  List<String> _medicineList = [];
+  List<Map<String, dynamic>> _medicineList = [];
   List<Map<String, dynamic>> _patientsList = [];
 
   bool _isLoading = false;
   bool _isButtonLoading = false;
 
-  String? get selectedMedicine => _selectedMedicine;
   String? get selectedPatient => _selectedPatient;
   String? get selectedPatientName => _selectedPatientName;
-  List<String> get medicineList => _medicineList;
+  List<Map<String, dynamic>> get medicineList => _medicineList;
   List<Map<String, dynamic>> get patientsList => _patientsList;
+  Map<String, dynamic>? get selectedMedicine => _selectedMedicine;
+
   bool get isLoading => _isLoading;
   bool get isButtonLoading => _isButtonLoading;
   set isButtonLoading(bool value) {
@@ -38,8 +39,13 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
 
     final snapshot =
         await FirebaseFirestore.instance.collection('Products').get();
-    _medicineList =
-        snapshot.docs.map((doc) => doc['productName'] as String).toList();
+    _medicineList = snapshot.docs
+        .map((doc) => {
+              'productName': doc['productName'] as String,
+              'manufacturerId': doc['manufacturerId'] as String,
+              'manufacturerName': doc['manufacturerName'] as String,
+            })
+        .toList();
 
     _isLoading = false;
     notifyListeners();
@@ -64,9 +70,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  
-
-  void selectMedicine(String? medicine) {
+  void selectMedicine(Map<String, dynamic>? medicine) {
     _selectedMedicine = medicine;
     notifyListeners();
   }
@@ -96,9 +100,11 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
       'id': orderId,
       'orderedBy': 'Hospital_$hospitalId',
       'orderedById': hospitalId,
-      'medicine': _selectedMedicine,
+      'medicine': selectedMedicine!['productName'],
       'current_handler': "Manufacturer",
       'currentTransistStatement': "Order Placed by Hospital",
+      'manufacturer_id': selectedMedicine!['manufacturerId'],
+      'manufacturer_name': selectedMedicine!['manufacturerName'],
       'delivered': false,
       'hospital_id': hospitalId,
       'hospital_name': hospitalData.name,
@@ -123,8 +129,6 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
       SnackBar(content: Text('Order placed for $_selectedMedicine')),
     );
   }
-
-  
 
   Future<void> createOrderBlockchain(Map<String, dynamic> orderData) async {
     Map<String, dynamic>? lastBlockData =

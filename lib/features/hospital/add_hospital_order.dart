@@ -24,41 +24,40 @@ class AddHospitalOrderPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  notifier.isLoading
-                      ? const CircularProgressIndicator()
-                      : DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Select Patient',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: notifier.selectedPatient,
-                          items: notifier.patientsList.map((patient) {
-                            return DropdownMenuItem<String>(
-                              value: patient['id'],
-                              child: Text(patient['name'],
-                                  style: AppTheme.bodyTextStyle),
-                            );
-                          }).toList(),
-                          onChanged: notifier.selectPatient,
-                        ),
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      labelText: 'Select Patient',
+                      border: OutlineInputBorder(),
+                    ),
+                    value: notifier.selectedPatient,
+                    items: notifier.patientsList.map((patient) {
+                      return DropdownMenuItem<String>(
+                        value: patient['id'],
+                        child: Text(patient['name'],
+                            style: AppTheme.bodyTextStyle),
+                      );
+                    }).toList(),
+                    onChanged: notifier.selectPatient,
+                  ),
                   const SizedBox(height: 20),
-                  notifier.isLoading
-                      ? const CircularProgressIndicator()
-                      : DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Select Medicine',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: notifier.selectedMedicine,
-                          items: notifier.medicineList.map((medicine) {
-                            return DropdownMenuItem<String>(
-                              value: medicine,
-                              child:
-                                  Text(medicine, style: AppTheme.bodyTextStyle),
-                            );
-                          }).toList(),
-                          onChanged: notifier.selectMedicine,
-                        ),
+                  DropdownButtonFormField<Map<String, dynamic>>(
+                    decoration: const InputDecoration(
+                      labelText: 'Select Medicine',
+                      border: OutlineInputBorder(),
+                    ),
+                    value: notifier.selectedMedicine,
+                    items: notifier.medicineList.map((medicine) {
+                      return DropdownMenuItem<Map<String, dynamic>>(
+                        value: medicine,
+                        child: Text(
+                            '${medicine['productName']}-${medicine['manufacturerName']}',
+                            style: AppTheme.bodyTextStyle),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      notifier.selectMedicine(value);
+                    },
+                  ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: notifier.isLoading
