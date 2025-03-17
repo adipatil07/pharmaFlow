@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -61,6 +63,25 @@ class AddOrderNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  String generateBatchNumber() {
+    DateTime now = DateTime.now();
+    String datePart =
+        "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    Random random = Random();
+    String randomPart =
+        List.generate(6, (index) => chars[random.nextInt(chars.length)]).join();
+
+    return "$datePart-$randomPart";
+  }
+
+  String generateOTP() {
+    Random random = Random();
+    return (100000 + random.nextInt(900000))
+        .toString(); // Generates 6-digit OTP
+  }
+
   Future<void> placeOrder(
       BuildContext context, Map<String, dynamic> orderData) async {
     if (_selectedMedicine == null) {
@@ -79,6 +100,19 @@ class AddOrderNotifier extends ChangeNotifier {
         .doc(orderData['id'])
         .set(orderData);
     await createOrderBlockchain(orderData);
+
+    String otp = generateOTP();
+    await FirebaseFirestore.instance.collection('Notifications').add({
+      'order_id': orderData['id'],
+      'otp': otp,
+      'batchNo': orderData['batchNo'],
+      'message':
+          "Your order has been placed successfully. Use OTP: $otp for verification.",
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'unverified',
+      'user_id': orderData['patient_id'],
+      'user_name': orderData['patient_name'],
+    });
 
     _isLoading = false;
     if (context.mounted) notifyListeners();

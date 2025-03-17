@@ -90,6 +90,7 @@ class AddOrderPage extends StatelessWidget {
                                   DateTime.now().toIso8601String(),
                               'orderTimestamp':
                                   DateTime.now().toIso8601String(),
+                              'batchNo': notifier.generateBatchNumber(),
                             };
                             notifier.placeOrder(context, orderData);
                             Navigator.of(context).pop();
