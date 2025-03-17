@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/patient/add_order_page.dart';
+import 'package:pharma_supply/features/patient/notification_page.dart';
 import 'package:pharma_supply/features/patient/patient_home_notifier.dart';
 import 'package:pharma_supply/widgets/tracking_card.dart';
 import 'package:provider/provider.dart';
@@ -20,13 +21,51 @@ class PatientHomePage extends StatelessWidget {
               style: AppTheme.headlineTextStyle.copyWith(color: Colors.white)),
           backgroundColor: AppTheme.primaryColor,
           actions: [
-            IconButton(
-                onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
-                },
-                icon: Icon(Icons.logout))
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'Scanning') {
+                  // Navigate to scanning page
+                } else if (value == 'Notifications') {
+                  // Navigate to notifications page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationPage(),
+                    ),
+                  );
+                } else if (value == 'Logout') {
+                  FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem(
+                  value: 'Scanning',
+                  child: Text('Scanning'),
+                ),
+                PopupMenuItem(
+                  value: 'Notifications',
+                  child: Text('Notifications'),
+                ),
+                PopupMenuItem(
+                  value: 'Logout',
+                  child: Text('Logout'),
+                ),
+              ],
+            ),
+
+            // IconButton(
+            //     onPressed: () async {
+            //       await FirebaseAuth.instance.signOut();
+            //       Navigator.pushReplacement(context,
+            //           MaterialPageRoute(builder: (context) => LoginPage()));
+            //     },
+            //     icon: Icon(Icons.logout))
           ],
         ),
         body: Column(
