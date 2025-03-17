@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -82,6 +84,25 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  String generateOTP() {
+    Random random = Random();
+    return (100000 + random.nextInt(900000))
+        .toString(); // Generates 6-digit OTP
+  }
+
+  String generateBatchNumber() {
+    DateTime now = DateTime.now();
+    String datePart =
+        "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    Random random = Random();
+    String randomPart =
+        List.generate(6, (index) => chars[random.nextInt(chars.length)]).join();
+
+    return "$datePart-$randomPart";
+  }
+
   Future<void> placeOrder(BuildContext context) async {
     if (_selectedMedicine == null || _selectedPatient == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -113,6 +134,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
       'orderTimestamp': DateTime.now().toIso8601String(),
       'patient_id': _selectedPatient,
       'patient_name': _selectedPatientName,
+      'batchNo': generateBatchNumber(),
     };
 
     await FirebaseFirestore.instance
@@ -120,6 +142,19 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
         .doc(orderId)
         .set(orderData);
     await createOrderBlockchain(orderData);
+
+    String otp = generateOTP();
+    await FirebaseFirestore.instance.collection('Notifications').add({
+      'order_id': orderData['id'],
+      'otp': otp,
+      'batchNo': orderData['batchNo'],
+      'message':
+          "Your order has been placed successfully. Use OTP: $otp for verification.",
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'unverified',
+      'user_id': hospitalId,
+      'user_name': hospitalData.name,
+    });
 
     _isButtonLoading = false;
     notifyListeners();
