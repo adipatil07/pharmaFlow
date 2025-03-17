@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pharma_supply/constants/constants.dart';
 import 'package:pharma_supply/features/auth/login_page.dart';
 import 'package:pharma_supply/features/auth/models/user_model.dart';
 import 'package:pharma_supply/features/manufacturer/add_product_page.dart';
@@ -10,6 +11,7 @@ import 'package:pharma_supply/features/patient/add_order_notifier.dart';
 import 'package:pharma_supply/services/firebase_service.dart';
 import 'package:pharma_supply/widgets/transporter_selection_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_bar_code/qr/src/qr_code.dart';
 
 class ManufacturerHomePage extends StatefulWidget {
   const ManufacturerHomePage({super.key});
@@ -292,104 +294,154 @@ class _ManufacturerHomePageState extends State<ManufacturerHomePage> {
       itemCount: notifier.orders.length,
       itemBuilder: (context, index) {
         var order = notifier.orders[index];
-        return Card(
-          color: Colors.white,
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: const [
+              BoxShadow(color: Colors.black12, spreadRadius: 1, blurRadius: 5)
+            ],
           ),
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Order ID: ${order['id']}",
-                      style: AppTheme.subtitleTextStyle.copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryColor),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Medicine: ${order['medicine']}",
-                      style: AppTheme.chipTextStyle.copyWith(
-                          fontSize: 14, color: AppTheme.headlineColor),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        Map<String, dynamic> orderData = {
-                          'id': order['id'],
-                          'label': "Manufacturer to Transporter",
-                          "by": "Manufacturer",
-                          "to": "Transporter",
-                        };
-                        try {
-                          UserModel loggedInUser =
-                              await FirebaseService.loggedInUser();
-                          await FirebaseService.updateOrderDetails(
-                              orderData['id'], {
-                            "latestModifiedBy":
-                                '${loggedInUser.name}_${loggedInUser.id}',
-                            "latestModifiedTimestamp":
-                                DateTime.now().toIso8601String(),
-                            "currentTransistStatement":
-                                "Manufacturing to Transporter",
-                            "status": "Pending"
-                          });
-                        } catch (e) {
-                          print("error");
-                        }
-                        if (order['id'] != null) {
-                          await Provider.of<AddOrderNotifier>(context,
-                                  listen: false)
-                              .addBlockToOrderChain(orderData);
-                        } else {
-                          print("Error: Order ID is null");
-                        }
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Image.network(
+                    Constants.PACKAGE_BOX_URL,
+                    width: 70,
+                    height: 70,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.error);
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order['id'] ?? "Unknown",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        "Medicine: ${order['medicine'] ?? "N/A"}",
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                      onTap: () {
+                        _showQRCodeDialog(
+                            context, '${order['batchNo']}|${order['id']}');
+                      },
+                      child: const Icon(Icons.qr_code,
+                          size: 30, color: Colors.black)),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.40,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            // Accept Order Logic
+                            Map<String, dynamic> orderData = {
+                              'id': order['id'],
+                              'label': "Manufacturer to Transporter",
+                              "by": "Manufacturer",
+                              "to": "Transporter",
+                            };
+                            try {
+                              UserModel loggedInUser =
+                                  await FirebaseService.loggedInUser();
+                              await FirebaseService.updateOrderDetails(
+                                  orderData['id'], {
+                                "latestModifiedBy":
+                                    '${loggedInUser.name}_${loggedInUser.id}',
+                                "latestModifiedTimestamp":
+                                    DateTime.now().toIso8601String(),
+                                "currentTransistStatement":
+                                    "Manufacturing to Transporter",
+                                "status": "Pending"
+                              });
+                            } catch (e) {
+                              print("error");
+                            }
+                            if (order['id'] != null) {
+                              await Provider.of<AddOrderNotifier>(context,
+                                      listen: false)
+                                  .addBlockToOrderChain(orderData);
+                            } else {
+                              print("Error: Order ID is null");
+                            }
 
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: AppTheme.backgroundColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          builder: (context) {
-                            return TransporterSelectionWidget(
-                                orderId: order['id'], notifier: notifier);
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: AppTheme.backgroundColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                              ),
+                              builder: (context) {
+                                return TransporterSelectionWidget(
+                                    orderId: order['id'], notifier: notifier);
+                              },
+                            );
                           },
-                        );
-                      },
-                      icon: Icon(
-                        Icons.done,
-                        color: Colors.green,
+                          icon: Icon(Icons.check_circle, color: Colors.white),
+                          label: Text("Accept"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                          ),
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _showCancelOrderDialog(context, order['id']);
-                      },
-                      icon: Icon(
-                        Icons.close,
-                        color: Colors.red,
+                      const SizedBox(
+                        width: 10,
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.40,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Reject Order Logic
+                            _showCancelOrderDialog(context, order['id']);
+                          },
+                          icon: Icon(Icons.cancel, color: Colors.white),
+                          label: Text("Reject"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         );
       },
@@ -447,6 +499,24 @@ Widget _buildPastOrdersList(ManufacturerNotifier notifier) {
             ],
           ),
         ),
+      );
+    },
+  );
+}
+
+void _showQRCodeDialog(BuildContext context, String data) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        content: QRCode(data: data),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Close"),
+          ),
+        ],
       );
     },
   );

@@ -38,14 +38,14 @@ class TransporterNotifier extends ChangeNotifier {
                 'patient_name': doc['patient_name'] ?? 'Unknown',
                 'hospital_name': doc['hospital_name'] ?? 'Unknown',
                 'status': doc['status'] ?? 'Pending',
+                'batchNo': doc['batchNo'] ?? 'Unknown',
               })
           .where((order) => order['status'] != 'Delivered')
           .toList();
 
       activeOrders =
           orders.where((order) => order['status'] != 'Pending').toList();
-    } catch (e) {
-    }
+    } catch (e) {}
 
     isLoading = false;
     notifyListeners();

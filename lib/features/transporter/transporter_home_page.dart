@@ -214,7 +214,8 @@ class TransporterHomePage extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                   onTap: () {
-                    _showQRCodeDialog(context, order['id']);
+                    _showQRCodeDialog(
+                        context, '${order['batchNo']}|${order['id']}');
                   },
                   child:
                       const Icon(Icons.qr_code, size: 30, color: Colors.black)),
