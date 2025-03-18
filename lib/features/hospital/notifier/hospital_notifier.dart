@@ -92,7 +92,7 @@ class HospitalNotifier extends ChangeNotifier {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('Orders')
           .where('orderedById', isEqualTo: userId)
-          .where('delivered', isEqualTo: true)
+          .where('status', isEqualTo: 'verified')
           .get();
 
       _pastOrders = querySnapshot.docs

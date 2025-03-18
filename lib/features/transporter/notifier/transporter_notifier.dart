@@ -40,7 +40,7 @@ class TransporterNotifier extends ChangeNotifier {
                 'status': doc['status'] ?? 'Pending',
                 'batchNo': doc['batchNo'] ?? 'Unknown',
               })
-          .where((order) => order['status'] != 'Delivered')
+          .where((order) => order['status'] != 'verified')
           .toList();
 
       activeOrders =
@@ -61,7 +61,7 @@ class TransporterNotifier extends ChangeNotifier {
           .collection('Orders')
           .where("assigned_transporter",
               isEqualTo: '${transporter.name}_${transporter.id}')
-          .where("status", isEqualTo: "Delivered")
+          .where("delivered", isEqualTo: true)
           .get();
 
       pastOrders = snapshot.docs.map((doc) {

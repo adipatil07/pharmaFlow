@@ -307,9 +307,9 @@ class TransporterHomePage extends StatelessWidget {
                     "to": "Patient",
                   };
                   try {
-                    if (newStatus == "Delivered") {
-                      notifier.markAsDelivered(order['id']);
-                    }
+                    // if (newStatus == "Delivered") {
+                    //   notifier.markAsDelivered(order['id']);
+                    // }
                     if (order['id'] != null) {
                       await Provider.of<AddOrderNotifier>(context,
                               listen: false)

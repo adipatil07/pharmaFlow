@@ -23,9 +23,7 @@ class PatientHomePage extends StatelessWidget {
           actions: [
             PopupMenuButton<String>(
               onSelected: (value) {
-                if (value == 'Scanning') {
-                  // Navigate to scanning page
-                } else if (value == 'Notifications') {
+                if (value == 'Notifications') {
                   // Navigate to notifications page
                   Navigator.push(
                     context,
@@ -44,10 +42,6 @@ class PatientHomePage extends StatelessWidget {
                 }
               },
               itemBuilder: (BuildContext context) => [
-                PopupMenuItem(
-                  value: 'Scanning',
-                  child: Text('Scanning'),
-                ),
                 PopupMenuItem(
                   value: 'Notifications',
                   child: Text('Notifications'),

@@ -149,7 +149,7 @@ class AddHospitalOrderNotifier extends ChangeNotifier {
       'otp': otp,
       'batchNo': orderData['batchNo'],
       'message':
-          "Your order has been placed successfully. Use OTP: $otp for verification.",
+          "Your order has been placed successfully.\nUse OTP: $otp for verification.\nBatch Number - ${orderData['batchNo']}.\nMedicine: ${orderData['medicine']}",
       'timestamp': FieldValue.serverTimestamp(),
       'status': 'unverified',
       'user_id': hospitalId,

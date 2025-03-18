@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pharma_supply/constants/app_theme.dart';
+import 'package:pharma_supply/features/patient/qr_view_screen.dart';
 
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
@@ -18,6 +19,7 @@ class NotificationPage extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('Notifications')
             .where('user_id', isEqualTo: currentUserId)
+            .where('status', isEqualTo: 'unverified')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -37,12 +39,8 @@ class NotificationPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final notification = notifications[index];
               final message = notification['message'];
-              // final otp = notification['otp'];
-              // final status = notification['status'];
-              // final formattedTime =
-              //     DateFormat('dd MMM yyyy, hh:mm a').format(timestamp);
-              // final timestamp =
-              //     (notification['timestamp'] as Timestamp).toDate();
+              final batchNo = notification['batchNo']; // Get batch number
+              final otp = notification['otp']; // OTP stored in Firestore
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -57,14 +55,6 @@ class NotificationPage extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.notifications_none,
-                        color: AppTheme.primaryColor,
-                        size: 32,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
                       Expanded(
                         child: Text(
                           message,
@@ -74,6 +64,21 @@ class NotificationPage extends StatelessWidget {
                             fontSize: 16,
                           ),
                         ),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        icon: const Icon(Icons.qr_code_scanner,
+                            color: Colors.blue, size: 32),
+                        onPressed: () {
+                          // Open QR Scanner
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  QRScannerScreen(batchNo: batchNo, otp: otp),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
